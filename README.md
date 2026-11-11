@@ -1,72 +1,66 @@
 # analog.design
 
 A static site. No build step, no framework — just HTML files in folders.
-Upload the contents of this folder to any static host and point analog.design at it.
+GitHub Pages serves this repo at https://analog.design; whatever is on `main`
+is what's live.
 
 ## Layout
 
 ```
-.htaccess               forces https, hides folder listings (Apache/GoDaddy)
+CNAME                   tells GitHub Pages the site lives at analog.design
 index.html              the logo grid
 favicon.svg
-roam/
-  index.html            one scrollable page: description → #support → #privacy
-  sphere.svg            the mark used on the grid
-  wordmark.svg          the horizontal mark at the top of the roam page
-  icon.png              app icon (kept for the favicon)
-  privacy/index.html    redirect → /roam/#privacy   (old URL, safe to give to Apple)
-  support/index.html    redirect → /roam/#support
+logo.svg                the analog logo, bottom-left on every page (links home)
 golfa/
   index.html            one scrollable page: description → #privacy → #terms
   assets/golfer.svg     the mark used on the grid
   assets/golfa-logo.svg full logo, used on the golfa page
   privacy/index.html    redirect → /golfa/#privacy
+roam/
+  index.html            one scrollable page: description → #support → #privacy
+  sphere.svg            the mark used on the grid
+  wordmark.svg          the horizontal mark at the top of the roam page
+  icon.png              app icon (used as the page's favicon)
+  privacy/index.html    redirect → /roam/#privacy
+  support/index.html    redirect → /roam/#support
+way/
+  index.html            one scrollable page: description → #support → #privacy → #terms
+  mark.svg              the colour-wheel mark, used on the grid and at the top of the Way page
+  mark-offwhite.svg     the same mark in off-white, for dark backgrounds (not used yet)
 ```
 
-Folder + `index.html` means the URLs are clean: `analog.design/roam/`,
-`analog.design/roam/#privacy`, and so on. The "analog design" wordmark at the
-bottom of every page links back to the grid.
+Folder + `index.html` means the URLs are clean: `analog.design/way/`,
+`analog.design/way/#privacy`, and so on. The analog logo at the bottom of every page
+links back to the grid; swap `logo.svg` to change it everywhere.
+
+## Updating the site
+
+On github.com: open the repo → **Add file → Upload files** → drag in the
+changed files or folders (keep the same names and folder structure so they
+overwrite the old ones) → **Commit changes**. The live site updates in about
+a minute.
+
+To change text: open the page's `index.html` on GitHub, click the pencil,
+edit, commit. Each page is one file with its styles at the top and its text
+below, in the order it appears on screen.
 
 ## Adding a project
 
-1. Make a folder: `myapp/`, with an `index.html` — copy `roam/index.html` or
-   `golfa/index.html` and swap in your text. Keep the legal/support text in
-   `<section id="…">` blocks below the description; that's the whole page.
-2. Drop the logo SVG in the folder.
+1. Make a folder: `myapp/`, with an `index.html` — copy `way/index.html` (or
+   roam's or golfa's) and swap in your text. Legal and support text lives in
+   `<section id="…">` blocks below the description.
+2. Put the logo (SVG or PNG) in that folder.
 3. In the root `index.html`, copy one of the `<a class="logo">` blocks inside
    `<nav class="grid">`, point it at `/myapp/` and the logo, and add a
    `.logo.myapp img { width: …px; }` rule so it sits at the same visual
    weight as the others.
 
-Logos show greyed-out and desaturated until hovered; the grid reflows on its
-own (2 across on a phone).
+Logos show greyed-out until hovered; the grid reflows on its own (2 across
+on a phone).
 
-## Hosting on GoDaddy (Web Hosting / cPanel)
+## Domain
 
-1. GoDaddy → My Products → **Web Hosting** → Manage → **cPanel Admin**.
-2. Files → **File Manager** → open **public_html**.
-   (If GoDaddy put a placeholder `index.html` or `coming-soon` page there,
-   delete it first.)
-3. Click **Upload**, choose `analog-design-site.zip`, wait for it to finish.
-4. Back in File Manager, right-click the zip → **Extract** → extract into
-   `public_html`. Then delete the zip.
-5. Make sure `.htaccess` is in `public_html` alongside `index.html`.
-   File Manager hides dot-files by default — Settings (top right) →
-   "Show Hidden Files (dotfiles)".
-6. Visit https://analog.design. Done.
-
-If analog.design was registered with GoDaddy and is on the same account, it
-is usually already pointed at the hosting; otherwise set the domain's A
-record to the hosting IP shown on the Web Hosting dashboard.
-
-To update later: upload the changed file(s) into the same folders and
-overwrite. No build step.
-
-**Note:** this is for GoDaddy *Web Hosting* (the cPanel product). GoDaddy's
-*Website Builder* is a drag-and-drop editor and cannot host uploaded HTML.
-
-## Other hosts
-
-Any static host serves it as-is: Cloudflare Pages, Netlify (drag the folder
-onto the dashboard), or GitHub Pages (push, enable Pages, add a `CNAME` file
-containing `analog.design`).
+analog.design is registered at GoDaddy. Its DNS has four A records
+(185.199.108.153, .109.153, .110.153, .111.153) and a `www` CNAME to
+`analogdesignstudio.github.io`. Nothing there needs to change when the site
+is updated.

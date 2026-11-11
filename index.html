@@ -48,23 +48,12 @@
   /* per-logo sizing so the marks feel the same visual weight */
   .logo.golfa img { width: 170px; }
   .logo.roam img  { width: 150px; }
+  .logo.way img   { width: 150px; }
 
   /* ---- wordmark, bottom left ---------------------------------------- */
   footer { padding: 0 48px 48px; }
-  .wordmark {
-    display: inline-block;
-    text-decoration: none;
-    font-weight: 900;
-    font-size: clamp(26px, 3.6vw, 44px);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: #000;
-  }
-  .wordmark .hollow {
-    color: transparent;
-    -webkit-text-stroke: 1.5px #000;
-    text-stroke: 1.5px #000;
-  }
+  .wordmark { display: inline-block; }
+  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
 
   @media (max-width: 640px) {
     main { padding: 40px 24px 32px; }
@@ -73,6 +62,7 @@
     .logo { width: auto; height: 140px; }
     .logo.golfa img { width: 120px; }
     .logo.roam img  { width: 104px; }
+    .logo.way img   { width: 104px; }
   }
 </style>
 </head>
@@ -90,10 +80,13 @@
     <a class="logo roam" href="/roam/" title="roam">
       <img src="/roam/sphere.svg" alt="roam">
     </a>
+    <a class="logo way" href="/way/" title="Way">
+      <img src="/way/mark.svg" alt="Way">
+    </a>
   </nav>
 </main>
 <footer>
-  <a class="wordmark" href="/"><span class="hollow">analog</span> design</a>
+  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
 </footer>
 </body>
 </html>

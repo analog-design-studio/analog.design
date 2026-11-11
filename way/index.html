@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Way — color your way</title>
+<meta name="description" content="Way is a color tool for iPhone. Point it at any color: Way reads it, names it, and shows the colors that go with it. Support, privacy policy and terms of use.">
+<link rel="icon" href="/way/mark.svg" type="image/svg+xml">
+<style>
+  /* Way's own palette: warm paper, near-black ink, one burnt-orange accent. */
+  :root { --paper: #E7E4DA; --ink: #0D0D0D; --dim: #5C5952; --line: rgba(13,13,13,0.16); --pop: #CC5500;
+          --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { background: var(--paper); color: var(--ink); }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    width: 100%;
+    max-width: 1280px;            /* fills the screen; a soft cap on very wide monitors */
+    padding: 72px 48px 96px;      /* same gutter as the home page */
+    flex: 1;
+  }
+  .mark { display: inline-block; margin-bottom: 64px; }
+  .mark img { display: block; width: clamp(96px, 11vw, 150px); height: auto; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 20px;
+  }
+  p { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 34px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p.tagline { font-size: clamp(28px, 2.4vw + 14px, 56px); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 32px; }
+
+  /* sections: Support, Privacy Policy, Terms of Use */
+  section { padding-top: 96px; }
+  section > .eyebrow { margin-bottom: 48px; }
+  h1 {
+    font-weight: 800;
+    font-size: clamp(22px, 1vw + 14px, 32px);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin: 48px 0 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  h3 { font-size: clamp(16px, 0.55vw + 10px, 21px); font-weight: 700; margin: 28px 0 6px; }
+  ul { margin: 0 0 24px 1.2em; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 10px; }
+  li::marker { color: var(--pop); }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(13,13,13,0.4); }
+  a:hover { text-decoration-color: var(--pop); }
+
+  /* ---- analog design wordmark, bottom left, on every page ------------ */
+  footer { width: 100%; padding: 0 48px 48px; }
+  .wordmark { display: inline-block; }
+  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
+  @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
+</style>
+</head>
+<body>
+<main>
+  <a class="mark" href="/way/" aria-label="Way">
+    <img src="/way/mark.svg" alt="Way">
+  </a>
+
+  <p class="eyebrow">Way for iPhone · iOS 17 and later</p>
+
+  <p class="tagline">Color your way.</p>
+
+  <p class="lead">Point your iPhone at any color. Way reads it, names it, and shows the colors that go with it: ten harmonies, each with HEX and RGB. No account. Nothing leaves your phone.</p>
+
+  <!-- ================================================================ -->
+  <section id="support">
+    <h1>Support</h1>
+    <p class="eyebrow">Common questions, and how to reach us</p>
+
+    <p class="lead">Way is simple, but color is tricky. These are the questions that come up most. For anything else, write to <a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a>.</p>
+
+    <h2>Reading a color</h2>
+
+    <h3>The color doesn't match what I see.</h3>
+    <p>Light changes color. On the "Is this the color you meant?" screen, use Set White and touch something white or gray in the photo. Way uses it to take the tint of the light out of the reading. Even light, no glare and no shadow give the best result.</p>
+
+    <h3>Way picked the wrong color.</h3>
+    <p>Tap No to see the other colors it found, or touch the photo and drag the marker to the exact spot.</p>
+
+    <h3>What do High, Medium and Low mean?</h3>
+    <p>How sure Way is of the reading. If you get Low, move closer and try again in more even light.</p>
+
+    <h2>Camera</h2>
+
+    <h3>Way says it doesn't have camera access.</h3>
+    <p>Tap Open Settings and turn Camera on. Upload works without it.</p>
+
+    <h3>Can I zoom, use the flash or switch cameras?</h3>
+    <p>Not yet. Move the phone until the color fills the square.</p>
+
+    <h2>Harmonies and the wheel</h2>
+
+    <h3>What is Light vs. Paint?</h3>
+    <p>Two color wheels. Light (RGB) is the wheel screens use, where the opposite of red is cyan. Paint (RYB) is the painter's wheel, where the opposite of red is green. Use Light for screens and Paint for pigment.</p>
+
+    <h3>What do undertone and opacity do?</h3>
+    <p>They mix your color with white, gray or black. The slider sets how much of the color is in the mix, and the line under it states the mix, for example "70% COLOR OVER 30% WHITE".</p>
+
+    <h3>Can I start from a color code?</h3>
+    <p>Yes. Open Wheel, tap search and type a HEX or RGB code.</p>
+
+    <h2>Palettes</h2>
+
+    <h3>How do I save a palette?</h3>
+    <p>Open a harmony on the wheel and tap Save. From a photo result, tap a harmony first to open it on the wheel.</p>
+
+    <h3>How do I delete one?</h3>
+    <p>Swipe it in the Palettes list.</p>
+
+    <h3>Do palettes move to a new iPhone?</h3>
+    <p>They are part of your iPhone backup, so restoring from a backup brings them along. Way does not sync between devices.</p>
+
+    <h3>How do I get the codes out?</h3>
+    <p>Tap a code or a color to copy it. Share sends every color in the palette, with HEX and RGB, as text.</p>
+
+    <h2>The basics</h2>
+
+    <h3>Which devices does Way run on?</h3>
+    <p>iPhone with iOS 17 or later.</p>
+
+    <h3>Do I need an account?</h3>
+    <p>No. There is nothing to sign in to.</p>
+
+    <h3>Is Way a subscription?</h3>
+    <p>No. You pay once on the App Store.</p>
+
+    <h3>Can I get a refund?</h3>
+    <p>Apple handles payments and refunds. Request one at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>.</p>
+
+    <h2>Contact</h2>
+    <p>Email <a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a> with "Way" in the subject. Your iPhone model and iOS version help. If a color read wrong, the photo helps too.</p>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="privacy">
+    <h1>Privacy Policy</h1>
+    <p class="eyebrow">Effective November 11, 2026</p>
+
+    <p class="lead">Way is a color tool for iPhone made by analog design. The short version: Way has no accounts, no servers, no analytics and no ads. Everything it does happens on your iPhone, and we never receive any of it.</p>
+
+    <h2>Your photos</h2>
+    <p>When you capture or upload a photo, Way reads its colors on your iPhone. The photo is never sent anywhere. Way does not keep a copy once the color is read, with one exception: a saved palette can keep a smaller copy of the photo its color came from, so the color and its source stay together. That copy is stored inside Way on your iPhone, and you can delete it from the palette at any time. Way never adds anything to your photo library.</p>
+
+    <h2>Camera</h2>
+    <p>Way asks for camera access so you can point your iPhone at a color. The live view and the photos you capture are processed on your iPhone only. You can turn camera access off at any time in the Settings app. Upload still works without it.</p>
+
+    <h2>Photo library</h2>
+    <p>Upload opens Apple's photo picker. Way receives only the photo you choose and cannot see the rest of your library.</p>
+
+    <h2>Palettes</h2>
+    <p>Palettes you save, and any photos kept with them, are stored in files inside Way on your iPhone. Way does not upload or sync them. If you back up your iPhone with iCloud or a computer, your palettes and their photos are part of that backup. Apple handles the backup under your own Apple Account, and we have no access to it.</p>
+    <p>To delete a palette, swipe it in the Palettes list. Deleting a palette deletes its photo. Deleting Way removes everything.</p>
+
+    <h2>Sharing and copying</h2>
+    <p>When you tap Share, Way hands the color codes to the iPhone's share sheet as plain text. Where that text goes is up to you and the app you pick. Copying a code puts it on your clipboard.</p>
+
+    <h2>Purchases</h2>
+    <p>Way is bought on the App Store. Apple takes the payment, and we never see your card or billing details.</p>
+    <p>The purchase belongs to your Apple Account, not to an account with us. Apple gives us sales totals that do not identify you.</p>
+
+    <h2>What we don't collect</h2>
+    <ul>
+      <li>No account, sign-in, name or email address</li>
+      <li>No location</li>
+      <li>No analytics, usage tracking or advertising</li>
+      <li>No tracking across other apps or websites</li>
+      <li>No outside code that sends data anywhere</li>
+    </ul>
+    <p>If you have chosen to share analytics with app developers in your iPhone settings, Apple may show us anonymous download and crash totals. Those come from Apple, not from Way.</p>
+
+    <h2>Children</h2>
+    <p>Way does not collect personal information from anyone, children included.</p>
+
+    <h2>If you email us</h2>
+    <p>If you write to us, we receive your email address and whatever you send. We use it only to reply, and we don't add it to any list.</p>
+
+    <h2>Your rights</h2>
+    <p>Because Way collects no personal data, we hold nothing about you to access, correct, export or delete. Your palettes and photos stay on your iPhone, under your control.</p>
+
+    <h2>Changes</h2>
+    <p>If Way changes in a way that affects your privacy, we will update this page and its date before the change ships.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about privacy: <a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a></p>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="terms">
+    <h1>Terms of Use</h1>
+    <p class="eyebrow">Effective November 11, 2026</p>
+
+    <p class="lead">These terms cover your use of Way, an iPhone app made by analog design. By using Way you agree to them.</p>
+
+    <h2>Your license</h2>
+    <p>Way is licensed to you under Apple's standard <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a>. The points below add what is specific to Way.</p>
+
+    <h2>Color accuracy</h2>
+    <p>Way gives its best reading of a color from a photo. Light, cameras, surfaces and screens all change how a color appears, so a reading can differ from the real thing. The High, Medium and Low labels are estimates.</p>
+    <p>Check a physical sample before you buy paint, send something to print or put a color into production.</p>
+    <p>Color names in Way are descriptive and come from public color-name lists. They are not the official names or codes of any paint, ink or color-matching system.</p>
+
+    <h2>Your colors and palettes</h2>
+    <p>The photos you use and the palettes you make are yours. You may use the colors and codes Way gives you for any purpose, including commercial work.</p>
+
+    <h2>Buying Way</h2>
+    <p>Way is a one-time purchase on the App Store. The price is shown there before you buy. Apple handles payment and refunds under its own policies, and we cannot issue refunds ourselves.</p>
+    <p>Your purchase covers Way as it is when you buy it. We may later offer optional paid extras. Features you have already paid for will not be moved behind them.</p>
+
+    <h2>Way itself</h2>
+    <p>The app, its design, its name and the way it works belong to analog design. Please don't copy, modify, reverse engineer or resell it, except where the law gives you that right.</p>
+
+    <h2>No warranty</h2>
+    <p>Way is provided as is, without warranties of any kind, as far as the law allows. To the same extent, analog design is not liable for indirect or consequential losses, including losses from relying on a color reading or from lost palettes. Our total liability is limited to the amount you paid for Way.</p>
+
+    <h2>Changes</h2>
+    <p>We may update these terms. When we do, the date at the top changes. Using Way after an update means you accept the new terms.</p>
+
+    <h2>Governing law</h2>
+    <p>These terms are governed by the laws of the State of Oregon, USA.</p>
+
+    <h2>Contact</h2>
+    <p><a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a></p>
+  </section>
+</main>
+<footer>
+  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
+</footer>
+</body>
+</html>
