@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>roam — the alarm clock for people who change time zones</title>
-<meta name="description" content="roam is the simplest alarm clock ever. Alarms belong to places: set one in a time zone and it rings only while you're there. Support and privacy policy.">
+<meta name="description" content="roam is the simplest alarm clock ever. Alarms belong to places: set one in a time zone and it rings only while you're there. Features, support, privacy and terms of use.">
 <link rel="icon" href="/roam/icon.png" type="image/png">
 <style>
   :root { color-scheme: dark; }
@@ -24,7 +24,20 @@
     padding: 72px 48px 96px;      /* same gutter as the home page */
     flex: 1;
   }
-  .mark { display: block; margin-bottom: 72px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 72px; }
+  .mark { display: block; }
+  .store {
+    display: inline-block;
+    padding: 13px 20px;
+    border-radius: 8px;
+    background: #fff;
+    color: #000;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .store:hover { background: rgba(255,255,255,0.85); }
   .mark img { display: block; width: clamp(220px, 26vw, 380px); height: auto; }
   .eyebrow {
     font-size: 11px;
@@ -49,11 +62,14 @@
     color: rgba(255,255,255,0.5);
     margin: 48px 0 12px;
   }
-  h3 { font-size: clamp(16px, 0.55vw + 10px, 21px); font-weight: 700; margin: 28px 0 6px; }
-  h3 + p { color: rgba(255,255,255,0.85); }
-  .orange { color: #FF5A14; }
-  .green { color: #2F9E5B; }
   section { padding-top: 96px; }
+  section > h1 + ul { margin-top: 32px; }
+  ul { margin: 0 0 24px 1.2em; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 14px; padding-left: 6px; }
+  li::marker { color: rgba(255,255,255,0.5); }
+  ol { margin: 0 0 24px 1.7em; }
+  ol li { padding-left: 6px; margin-bottom: 18px; }
+  ol li::marker { font-weight: 700; }
   section .eyebrow { margin-bottom: 48px; }
   a { color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,0.5); }
   a:hover { text-decoration-color: #fff; }
@@ -67,9 +83,12 @@
 </head>
 <body>
 <main>
-  <a class="mark" href="/roam/" aria-label="roam">
-    <img src="/roam/wordmark.svg" alt="roam">
-  </a>
+  <header class="top">
+    <a class="mark" href="/roam/" aria-label="roam">
+      <img src="/roam/wordmark.svg" alt="roam">
+    </a>
+    <a class="store" href="https://apps.apple.com/us/app/roam-one-tap-travel-alarms/id6830828485">Download from the App Store</a>
+  </header>
 
   <p class="eyebrow">roam for iPhone · iOS 26 and later</p>
 
@@ -78,42 +97,35 @@
   <p>Spin the globe to a zone, tap a time, and that's your alarm. Land in Tokyo and your Tokyo alarms wake up; your Los Angeles ones go quiet until you're home. No account, no server, no analytics — everything stays on your phone.</p>
 
   <!-- ================================================================ -->
+  <section id="features">
+    <h1>Features</h1>
+    <ul>
+      <li>Pick a zone by spinning a globe or typing a city name.</li>
+      <li>Tap a time for a one-off alarm today or tomorrow, or pick a specific date.</li>
+      <li>Press and hold a time for two seconds to make it repeat. If no days are chosen yet, it starts on Monday to Friday.</li>
+      <li>Repeats can run weekly, every other week, every third week, or monthly (for example, the second Tuesday of each month).</li>
+      <li>One-offs are white. Repeats come in three colors (orange, cyan and purple), and you can name what each color is for in settings.</li>
+      <li>Name any alarm. The name appears when it rings.</li>
+      <li>Swipe left to see every alarm across all zones, grouped by color.</li>
+      <li>Snooze for 7.5 minutes, as many times as you like. The countdown shows on the Lock Screen and in the Dynamic Island.</li>
+      <li>Choose from eight alarm tones. The sound starts quiet and builds over about sixteen seconds to half volume. Turn on BOOST in settings to let it climb to full volume.</li>
+      <li>Switch to a 24-hour clock in settings.</li>
+      <li>Alarms are matched by clock time, so a Los Angeles alarm can ring in Phoenix when both share the same hour.</li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
   <section id="support">
     <h1>Support</h1>
-    <p class="eyebrow">How it works, common questions, and how to reach us</p>
-
-    <h2>How it works</h2>
-    <p>Spin the globe to a zone, or tap the city name and type one. Tap a time — that's a one-off alarm for today or tomorrow. Hold a time for two seconds and it becomes a repeat on the lit day letters. Swipe left for every alarm in every zone.</p>
-    <p>An alarm is <span class="green">active</span> when your phone is in its zone and inactive everywhere else. Land in Tokyo and your Tokyo alarms wake up; your Los Angeles ones go quiet until you're home.</p>
-
-    <h2>Questions</h2>
-
-    <h3>My alarm didn't ring.</h3>
-    <p>Check that your phone is actually in the alarm's zone — the city name on the globe turns green when it is, and the tray lists it under ACTIVE. An alarm set for a zone you're not in waits until you arrive. Also check that roam is allowed to schedule alarms: Settings → roam.</p>
-
-    <h3>It rang in a different city than I set.</h3>
-    <p>roam matches zones by their clock, not their name. A Los Angeles alarm rings in Phoenix while both are on the same hour, and a Paris alarm rings in Berlin. That's by design: you asked to be woken at 7, and it's 7.</p>
-
-    <h3>How do I make an alarm repeat?</h3>
-    <p>Hold a time for two seconds. If no day letters are lit, roam lights Monday to Friday for you; tap letters to change the days. Repeats are <span class="orange">orange</span>, one-offs are white.</p>
-
-    <h3>How do I delete an alarm?</h3>
-    <p>Tap its pill on the grid to clear it, or swipe its row left in the tray. One-off alarms clear themselves after they ring.</p>
-
-    <h3>How do I change the sound?</h3>
-    <p>Open the tray, find the alarm, tap the small speaker on its row. Eight tones; tap one to hear it and choose it.</p>
-
-    <h3>Why is it so quiet at first?</h3>
-    <p>On purpose. The sound starts near silence and builds over about sixteen seconds, and it never goes above half volume. The level follows your phone's ringer volume.</p>
-
-    <h3>I changed time zones and nothing happened.</h3>
-    <p>Open roam after you land. It re-checks the zone every time it comes to the front, arms the alarms for where you are, and quiets the rest.</p>
-
-    <h3>Does roam work on iPad or older iPhones?</h3>
-    <p>No. roam needs the alarm system introduced in iOS 26, so it runs on iPhones with iOS 26 or later.</p>
-
-    <h2>Get in touch</h2>
-    <p>Found a bug, or have a zone that's wrong? Say what you set, where you were, and what happened. Write to <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a>.</p>
+    <ul>
+      <li>Don't rely on roam as your only alarm for anything important. Set a backup.</li>
+      <li>Delete an alarm by tapping its pill on the grid or swiping its row in the tray. One-off alarms clear themselves after ringing.</li>
+      <li>To clear every alarm in a zone, pull the time grid down from the top and let go.</li>
+      <li>Alarms in zones you haven't been in for three months expire automatically.</li>
+      <li>If an alarm doesn't ring, check that your phone is in its zone and that roam has permission to schedule alarms.</li>
+      <li>After changing time zones, open roam so it can re-check your zone.</li>
+      <li>Bug reports and zone issues go to <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a>.</li>
+    </ul>
   </section>
 
   <!-- ================================================================ -->
@@ -143,6 +155,35 @@
 
     <h2>Questions</h2>
     <p>Write to <a href="mailto:helloanalogdesign@gmail.com">helloanalogdesign@gmail.com</a>.</p>
+  </section>
+  <!-- ================================================================ -->
+  <section id="terms">
+    <h1>Terms of use</h1>
+    <p class="eyebrow">Effective 19 November 2026.</p>
+
+    <p>These terms are an agreement between you and Blake Ziolkowski, an individual in Oregon doing business as analog design ("analog design", "we", "us"). By downloading or using roam, you agree to them. If you don't agree, don't use roam. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
+
+    <ol>
+      <li><strong>License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use roam on Apple devices you own or control, as the App Store's usage rules allow.</li>
+      <li><strong>Don't rely on roam alone.</strong> roam depends on iOS, your phone's settings, its battery, its volume and silent settings, and the time zone your phone reports. An alarm may not ring, may ring late, or may ring in a zone you didn't expect. Never use roam as your only alarm for anything important, including flights, travel connections, work, medication, appointments, childcare or safety. Set a backup.</li>
+      <li><strong>Time zones.</strong> roam matches alarms by clock time, using the time zone your phone reports. Zones, daylight saving rules and the way iOS reports them can change or be wrong. We aren't responsible for an alarm that rings, or doesn't ring, because of how a zone is defined or reported.</li>
+      <li><strong>Sound.</strong> Alarm tones build in volume, and BOOST lets them climb to full volume. Set a volume that is safe for your hearing and suitable for where you are.</li>
+      <li><strong>Your choices and risk.</strong> You decide when and where to set alarms and what you rely on them for, at your own risk. We aren't responsible for any missed event, travel cost, lost booking, lost wages, injury or other loss arising from an alarm that did or didn't ring.</li>
+      <li><strong>Your data is your responsibility.</strong> Alarms and settings are stored only on your device. We have no copy and can't recover them. We aren't liable for any loss or corruption of data, however it happens.</li>
+      <li><strong>Your content.</strong> You own what you put in roam, such as alarm and color names. Because it never leaves your device, we don't receive or use it.</li>
+      <li><strong>Our property.</strong> roam, its design, code, tones, name and logo belong to analog design and are protected by law. You may not copy, modify, distribute, sell, rent, reverse engineer, decompile or make derivative works of roam, except where the law expressly allows despite this restriction.</li>
+      <li><strong>Disclaimer of warranties.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, ROAM AND THIS SITE ARE PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, QUIET ENJOYMENT AND NON-INFRINGEMENT. WE DON'T WARRANT THAT ROAM WILL RING ON TIME OR AT ALL, OR THAT IT WILL BE UNINTERRUPTED, ERROR-FREE, SECURE OR COMPATIBLE WITH YOUR DEVICE, OR THAT DEFECTS WILL BE FIXED.</li>
+      <li><strong>Limitation of liability.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, ANALOG DESIGN AND ITS OWNERS, MEMBERS, EMPLOYEES, CONTRACTORS AND AGENTS WILL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY OR PUNITIVE DAMAGES, OR FOR ANY LOSS OF DATA, PROFITS, REVENUE, WAGES, BOOKINGS, GOODWILL OR OPPORTUNITY, OR FOR PERSONAL INJURY OR PROPERTY DAMAGE, ARISING FROM OR RELATED TO ROAM, THIS SITE OR THESE TERMS, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, EVEN IF WE WERE TOLD THEY WERE POSSIBLE. OUR TOTAL LIABILITY FOR ALL CLAIMS WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID FOR ROAM IN THE 12 MONTHS BEFORE THE CLAIM, OR US$10. THESE LIMITS APPLY EVEN IF A REMEDY FAILS OF ITS ESSENTIAL PURPOSE. Some places don't allow certain exclusions or limits, so some of these may not apply to you. Where that's the case, our liability is limited to the smallest amount the law allows.</li>
+      <li><strong>Indemnity.</strong> To the extent the law allows, you agree to defend, indemnify and hold harmless analog design and its owners, members, employees, contractors and agents from any claim, loss, liability, damage, cost or expense, including reasonable legal fees, arising from your use or misuse of roam, your activities, or your breach of these terms or the law.</li>
+      <li><strong>Disputes and arbitration.</strong> Before filing any claim, email <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a> describing it, and give us 60 days to try to resolve it. If we can't, you and we agree that any dispute arising from or related to roam, this site or these terms will be resolved by <strong>binding individual arbitration</strong> administered by the American Arbitration Association under its Consumer Arbitration Rules, except that either side may bring an individual claim in small claims court. <strong>YOU AND WE WAIVE ANY RIGHT TO A JURY TRIAL AND TO TAKE PART IN A CLASS, COLLECTIVE OR REPRESENTATIVE ACTION.</strong> The arbitrator may award relief only to you individually. You may opt out of this section by emailing us within 30 days of first using roam, with your name and a statement that you opt out. If this section doesn't apply, claims go only to the state or federal courts in Oregon, and you and we consent to their jurisdiction.</li>
+      <li><strong>Time limit.</strong> Any claim must be brought within one year after it arises, or it's permanently barred, to the extent the law allows.</li>
+      <li><strong>Governing law.</strong> These terms are governed by the laws of the State of Oregon, USA, and the Federal Arbitration Act, without regard to conflict-of-law rules. The UN Convention on Contracts for the International Sale of Goods doesn't apply.</li>
+      <li><strong>Apple.</strong> These terms are between you and analog design, not Apple. Apple has no obligation to provide maintenance or support for roam. If roam fails to meet any applicable warranty, you may notify Apple for a refund of the purchase price, if any, and Apple has no other warranty obligation. We, not Apple, are responsible for any product claims, consumer protection claims or intellectual property claims about roam, to the extent these terms don't disclaim them. Apple and its subsidiaries are third-party beneficiaries of these terms and may enforce them against you. You confirm that you aren't in a country under a US government embargo and aren't on any US government list of prohibited or restricted parties.</li>
+      <li><strong>Changes and ending.</strong> We may update these terms. We'll post the new version here with a new effective date. If you keep using roam after that, you accept the update. We may stop offering or supporting roam at any time. Your license ends automatically if you break these terms. Sections 2 to 6 and 8 to 17 survive.</li>
+      <li><strong>General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. These terms and the EULA are the whole agreement about roam.</li>
+    </ol>
+
+    <p><strong>Contact:</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a></p>
   </section>
 </main>
 <footer>

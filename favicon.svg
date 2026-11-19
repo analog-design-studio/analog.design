@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#000"/><text x="32" y="44" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="900" font-size="36" fill="#fff">a</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-140 -110 680 680">
+<!-- the "a" from the analog logo (logo.svg), white on a black rounded square -->
+<rect x="-140" y="-110" width="680" height="680" rx="150" fill="#000"/>
+<g fill="#fff">
+<path d="M69 47C69 32.0883 81.0883 20 96 20H351C365.912 20 378 32.0883 378 47V73C378 87.9117 365.912 100 351 100H96C81.0883 100 69 87.9117 69 73V47Z"/>
+<path d="M351 55C365.912 55 378 67.0883 378 82L378 414C378 428.912 365.912 441 351 441H325C310.088 441 298 428.912 298 414L298 82C298 67.0883 310.088 55 325 55H351Z"/>
+<path d="M271 100L298 100L298 127A27 27 0 0 0 271 100Z"/>
+<circle cx="172" cy="291" r="150"/>
+</g>
+</svg>

@@ -8,8 +8,9 @@ is what's live.
 
 ```
 CNAME                   tells GitHub Pages the site lives at analog.design
+.nojekyll               (already in the repo) tells GitHub Pages to publish the files as they are
 index.html              the logo grid
-favicon.svg
+favicon.svg             browser-tab icon for the home page: the "a" from the analog logo
 logo.svg                the analog logo, bottom-left on every page (links home)
 golfa/
   index.html            one scrollable page: description → #privacy → #terms
@@ -17,7 +18,7 @@ golfa/
   assets/golfa-logo.svg full logo, used on the golfa page
   privacy/index.html    redirect → /golfa/#privacy
 roam/
-  index.html            one scrollable page: description → #support → #privacy
+  index.html            one scrollable page: description → #features → #support → #privacy → #terms
   sphere.svg            the mark used on the grid
   wordmark.svg          the horizontal mark at the top of the roam page
   icon.png              app icon (used as the page's favicon)
@@ -27,6 +28,10 @@ way/
   index.html            one scrollable page: description → #support → #privacy → #terms
   mark.svg              the colour-wheel mark, used on the grid and at the top of the Way page
   mark-offwhite.svg     the same mark in off-white, for dark backgrounds (not used yet)
+hew/
+  index.html            one scrollable page: description → #support → #privacy → #terms
+  icon.svg              the app icon (charcoal "Hew" bottom left on orange), used on the grid and as the tab icon
+  mark.svg              the charcoal wordmark alone, used at the top of the orange Hew page
 ```
 
 Folder + `index.html` means the URLs are clean: `analog.design/way/`,
@@ -43,6 +48,13 @@ a minute.
 To change text: open the page's `index.html` on GitHub, click the pencil,
 edit, commit. Each page is one file with its styles at the top and its text
 below, in the order it appears on screen.
+
+## App Store buttons
+
+roam and Way have a "Download from the App Store" button at the top right of
+their pages: the `<a class="store" href="…">` line inside `<header class="top">`.
+To add one to another page (Hew has a commented-out line ready), put the same
+line there with that app's App Store link.
 
 ## Adding a project
 
