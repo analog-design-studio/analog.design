@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LODGE — a private logbook for fishing, hunting, foraging and trapping</title>
+<meta name="description" content="LODGE is a private logbook for fishing, hunting, foraging and trapping on iPhone. No account. Your logbook is stored only on your iPhone. Support, privacy policy and terms of use.">
+<link rel="icon" href="/LODGE/icon.png" type="image/png">
+<style>
+  /* LODGE's own colours, from the app: ink, cream, leather and safety orange. */
+  :root { color-scheme: dark; --bg: #110903; --ink: #F2EEE4; --dim: #B9B3A6; --line: rgba(110,75,40,0.6); --accent: #A4723F; --hero: #FF6700; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    width: 100%;                  /* always the full width of the window, whatever its size */
+    padding: 72px 48px 96px;      /* same gutter as the home page */
+    flex: 1;
+  }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 64px; }
+  .mark { display: block; }
+  .mark img { display: block; width: clamp(80px, 8vw, 116px); height: auto; }
+  .store {
+    display: inline-block;
+    padding: 13px 20px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .store:hover { opacity: 0.85; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 20px;
+  }
+  p { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 52px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p.lead strong { font-weight: 700; }
+
+  /* sections: Support, Privacy policy, Terms of use */
+  section { padding-top: 96px; }
+  section > .eyebrow { margin-bottom: 40px; }
+  section > h1 + h2 { margin-top: 32px; }
+  h1 { font-weight: 700; font-size: clamp(28px, 1.6vw + 16px, 44px); line-height: 1; letter-spacing: -0.035em; margin-bottom: 12px; }
+  h2 {
+    font-size: clamp(18px, 0.6vw + 12px, 24px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 48px 0 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  ul, ol { margin: 0 0 24px 1.2em; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 10px; }
+  li::marker { color: var(--accent); }
+  li > ul { margin-top: 10px; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--dim); }
+  a:hover { text-decoration-color: var(--ink); }
+
+  /* ---- analog design studio logo, bottom left, on every page --------- */
+  footer { width: 100%; padding: 0 48px 48px; }
+  .wordmark { display: inline-block; }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
+  @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
+
+  /* LODGE's type, as in the app: the system face for text, and its condensed heavy cut,
+     in capitals, for headlines. On Apple devices that is San Francisco; elsewhere the nearest match. */
+  body { font-family: -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  h1 {
+    font-family: -apple-system, system-ui, "Helvetica Neue", "Arial Narrow", sans-serif;
+    font-stretch: condensed;
+    font-weight: 800;
+    font-size: clamp(36px, 2.4vw + 18px, 60px);
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--hero);
+  }
+  /* header: the horns with LODGE beside them, in the proportions of the app's own header mark
+     (word 5/7 the height of the horns, gap 2/7, letters spaced by a tenth) */
+  .mark { --h: clamp(56px, 6vw, 88px); display: flex; align-items: center; gap: calc(var(--h) * 0.286); color: var(--ink); text-decoration: none; }
+  .mark img { width: auto; height: var(--h); }
+  .mark .word {
+    font-family: -apple-system, system-ui, "Helvetica Neue", "Arial Narrow", sans-serif;
+    font-stretch: condensed;
+    font-weight: 800;
+    font-size: calc(var(--h) * 0.714);
+    line-height: 1;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <a class="mark" href="/LODGE/" aria-label="LODGE">
+      <img src="/LODGE/horns-white.png" alt=""><span class="word">LODGE</span>
+    </a>
+  </header>
+
+  <p class="eyebrow">LODGE for iPhone · iOS 17 and later</p>
+
+  <p class="lead"><strong>LODGE</strong> is a private logbook for fishing, hunting, foraging and trapping. Log each session: where you went, what you took, the gear you used and the story. Keep your spots on a private map, plan trips with your crew, track what rides in the truck, and ask your own logbook questions in plain words. No account. Your logbook is stored only on your iPhone.</p>
+  <p><strong>LODGE is a logbook, not a rulebook.</strong> It doesn't know the law, the seasons, the limits, the weather or the water where you are, and it can't tell you what is safe to eat. Those are always yours to check.</p>
+  <p><strong>Requirements:</strong> iPhone with iOS 17 or later. Written answers in Find need iOS 26 or later and an iPhone with Apple Intelligence turned on. Without it, Find shows the matching records instead. The price is shown on LODGE's App Store page.</p>
+
+  <!-- ================================================================ -->
+  <section id="support">
+    <h1>Support</h1>
+
+    <h2>Read this first</h2>
+    <ul>
+      <li>LODGE records what you tell it. It doesn't know or check any hunting, fishing, foraging or trapping rule: seasons, limits, sizes, licenses, tags, legal methods, closed areas or protected species. Check the current regulations for where you are, every time.</li>
+      <li>The <strong>limit</strong> on a harvest is a number you type. "Limit reached" only means you reached your own number.</li>
+      <li>The species list is a list of names. A species being listed doesn't mean it's legal to take, in season, found near you or safe to eat. The silhouettes are decoration and can't be used to identify anything.</li>
+      <li>Never eat a wild mushroom, plant, fish, shellfish or animal because of anything in LODGE.</li>
+      <li>The spot scores are a rough guess about when a spot might be good. They aren't a weather forecast, a tide table or a safety warning, and "Peak Window" never means a legal open season.</li>
+      <li>The maps are for marking your own spots. They aren't for navigation and don't show property lines, land ownership or closures.</li>
+      <li>LODGE isn't a safety device. It can't call for help and it doesn't share your location with anyone.</li>
+    </ul>
+
+    <h2>Getting around</h2>
+    <ul>
+      <li>Five tabs: Field, Spots, Logbook, Truck and Find. Tapping a tab always returns to that tab's main page.</li>
+      <li>Your profile is at the top left. The plus at the top right adds a Session, Highlight, Spot, Trip or Gear.</li>
+      <li>A new install starts empty. On first launch, LODGE shows its warnings and asks you to accept the privacy policy and terms. The date you accepted is shown at the bottom of Profile. If the terms change, LODGE asks you to accept again.</li>
+    </ul>
+
+    <h2>Logging a session</h2>
+    <ul>
+      <li>There are four steps: where, the take, the gear and the story.</li>
+      <li><strong>Where.</strong> Choose fishing, hunting, foraging or trapping, the date (today or earlier), and one of your saved spots. Or choose "Somewhere new" and type a region.</li>
+      <li><strong>The take.</strong> Open Harvest, search, and pick what you took. Fish, birds and animals are counted. Anything foraged is weighed in pounds. Type what you took and, if you want, the day's limit. You need at least one harvest with a take above zero to go on.</li>
+      <li>The harvest list shows what the catalog holds for the part of the Americas your spot is in. A species that isn't in the catalog can't be logged in this version.</li>
+      <li><strong>The gear.</strong> Pick what you used from the truck, or add new gear on the spot. This step can be skipped.</li>
+      <li><strong>The story.</strong> A caption and a rating from 1 to 10 are needed to save. Notes and up to 8 photos are optional. The first photo is the cover.</li>
+      <li>A <strong>Highlight</strong> is a session with a badge, such as Personal best or First of the season.</li>
+    </ul>
+
+    <h2>Spots</h2>
+    <ul>
+      <li>To add a spot, give it a name, pick what it's for, and drag the map until the crosshair sits on the place. LODGE never uses your iPhone's location. A spot is wherever you put the crosshair.</li>
+      <li>Notes, Best when and Access are your own words.</li>
+      <li>A spot's rating is the average of the ratings on the sessions you logged there.</li>
+      <li><strong>Globe view:</strong> drag to turn, pinch to zoom, tap a pin. Slide left for where you've been in the past year. Slide right for the next 10 days.</li>
+    </ul>
+
+    <h2>Spot scores and Peak Window</h2>
+    <ul>
+      <li>Each spot gets a rough score from four things: time of year, temperature, rain and the moon's phase.</li>
+      <li>For the next 10 days LODGE uses Apple Weather. On a day with no Apple data, it shows long-term monthly averages for a broad climate zone, labeled as averages.</li>
+      <li>"Peak Window" is LODGE's own starting guess for when a kind of spot is usually good. It is the same for every new spot of that kind and has nothing to do with legal seasons.</li>
+      <li>LODGE shows the moon's phase. It gives no tide information, so use a real tide table.</li>
+    </ul>
+
+    <h2>Trips</h2>
+    <ul>
+      <li>Make a trip with a name, a region and your crew's names. Then tap each day on the calendar, plan each day, connect your spots, list the gear to bring, and log sessions from the trip.</li>
+      <li>Crew are only names. Nothing is sent to them.</li>
+      <li><strong>Share</strong> builds a one-page trip sheet and saves it to Photos, in a phone shape or a letter page. "Show spot names" starts on. Turn it off and spots appear as their region only. Pins and coordinates are never on the sheet.</li>
+    </ul>
+
+    <h2>Truck</h2>
+    <ul>
+      <li>Gear rides under six headings: Fishing, Hunting, Foraging, Trapping, Camping and 4Wheeling.</li>
+      <li>Open a piece of gear to add photos, change its note or heading, and see every session it was used on.</li>
+      <li>Tap the truck under a post when an outing shows you need something. It then appears under Need New Gear.</li>
+    </ul>
+
+    <h2>Field and Logbook</h2>
+    <ul>
+      <li>The Field shows your sessions, highlights and trips, newest first. The star, heart and truck under a post file it under Priority, Favorites or Gear.</li>
+      <li>The Logbook shows this year's sessions by activity, your totals by species, and Dream Harvest.</li>
+      <li><strong>Dream Harvest</strong> is a personal checklist of the 861 species in the catalog. A species is ticked the first time you log it. Tap a row to tick or untick it by hand. The list includes species that are protected or closed in many places, so a row on the list is never a suggestion to take one.</li>
+    </ul>
+
+    <h2>Find</h2>
+    <ul>
+      <li>Ask a question in plain words, such as "What gear did I use at" a spot. LODGE searches only your own sessions, spots, trips and gear.</li>
+      <li>On an iPhone with Apple Intelligence turned on (iOS 26 or later), Apple's on-device model writes a short answer from the matching records. On other iPhones, LODGE shows the closest matches. The line under the question box says which you're getting.</li>
+      <li>Written answers can be wrong. Every answer lists the records it came from, so tap them to check.</li>
+      <li>Find understands time phrases such as "last year", "2 years ago", "in October" and "last fall".</li>
+      <li>The share icon sends the question and answer as plain text. That text can include spot names, so read it before you send it.</li>
+    </ul>
+
+    <h2>Photos</h2>
+    <ul>
+      <li>Photos come from Apple's photo picker, so LODGE only gets the photos you pick. It keeps a smaller copy and leaves the original alone.</li>
+      <li>Tap a photo to view it, make it the cover or delete it. Tap your profile picture to change it.</li>
+    </ul>
+
+    <h2>Sharing a session</h2>
+    <ul>
+      <li>Tap Share, pick the platform and the post shape, and LODGE builds an image at that size and saves it to Photos. You post it yourself. LODGE never posts anything.</li>
+      <li>Spot names and pins are never on a session image. "Show region" controls whether the region line appears.</li>
+      <li>The first time, your iPhone asks whether LODGE may add to Photos. If you see "Couldn't save", open Settings, then Privacy &amp; Security, then Photos, and let LODGE add photos.</li>
+    </ul>
+
+    <h2>Editing and deleting</h2>
+    <ul>
+      <li>On a saved session you can change the gear used, the photos, the cover and its lists. The caption, notes, date, take, rating and place can't be edited in this version. To fix one, delete the session and log it again.</li>
+      <li>On a saved spot you can change photos only. On a trip you can change days, plans, connected spots, crew and gear. On gear you can change the note and heading.</li>
+      <li>Delete a session, spot or trip from the menu at the top right of its page. Deleting can't be undone.</li>
+      <li>Deleting a spot or a trip keeps the sessions logged there. Deleting a session removes its take and photos. Dream Harvest ticks stay until you untick them.</li>
+    </ul>
+
+    <h2>Units and coverage</h2>
+    <ul>
+      <li>Weights are in pounds and temperatures in Fahrenheit. There is no metric option in this version.</li>
+      <li>The species catalog covers North, Central and South America.</li>
+    </ul>
+
+    <h2>Your data</h2>
+    <ul>
+      <li>Everything is stored only on your iPhone and is included in its iCloud or computer backup. There is no account, no sync between devices and no export in this version.</li>
+      <li>If you delete LODGE, everything in it is deleted too. We have no copy and can't recover it. Keep your iPhone backed up.</li>
+      <li>If LODGE can't open your saved logbook, it tells you at launch. Don't delete the app. Email us first.</li>
+    </ul>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li><strong>"Lodge couldn't open your saved logbook."</strong> LODGE has started a new, empty logbook. The old one is still on your iPhone, and deleting the app would remove it. Don't delete LODGE. Email us with your iPhone model and iOS version. Restoring your iPhone from a backup made before the message first appeared is the other way back.</li>
+      <li><strong>"Lodge can't save to this phone right now."</strong> Nothing you add will be kept while this message keeps appearing. Close LODGE fully and open it again. If it comes back, restart your iPhone, make sure it has free storage, and email us.</li>
+      <li><strong>The map is blank.</strong> Maps need an internet connection. So does Apple Weather. Without it, spots show monthly averages. Everything else works offline.</li>
+      <li><strong>Find only shows matches.</strong> Written answers need iOS 26 or later and Apple Intelligence turned on in Settings. Apple's model can take a while to download after you turn it on.</li>
+      <li><strong>I can't get past a step.</strong> Step 1 needs a spot or a region. Step 2 needs a take above zero. Step 4 needs a caption and a rating.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <ul>
+      <li>Email <a href="mailto:helloanalogdesign@gmail.com?subject=LODGE">helloanalogdesign@gmail.com</a> with "LODGE" in the subject. Include your iPhone model and iOS version.</li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="privacy">
+    <h1>Privacy policy</h1>
+    <p class="eyebrow">Effective 24 November 2026.</p>
+
+    <p>LODGE is made by analog design ("we", "us"). This policy covers the LODGE app for iPhone and this page.</p>
+    <p><strong>The short version:</strong> your logbook lives only on your iPhone. We have no account system and no server, so we never receive your sessions, spots, trips, gear, photos or questions. Two Apple services inside LODGE use the internet, maps and weather, and they are described below.</p>
+
+    <h2>What LODGE stores on your iPhone</h2>
+    <ul>
+      <li><strong>Profile:</strong> your name, home water and profile photo, if you add them, and the date and version of the privacy policy and terms you accepted.</li>
+      <li><strong>Sessions:</strong> date, activity, place or region, what you took, the limits you typed, caption, notes, rating, badge, gear used and photos.</li>
+      <li><strong>Spots:</strong> name, region, the map coordinates you chose, notes, "best when", access notes and photos.</li>
+      <li><strong>Trips:</strong> name, region, days and plans, crew names, gear list, connected spots and photos.</li>
+      <li><strong>Gear:</strong> name, note, heading and photos.</li>
+      <li><strong>Dream Harvest:</strong> which species you've ticked and when.</li>
+    </ul>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li>Nothing. LODGE has no accounts, no servers of ours, no analytics, no ads and no third-party code. We can't see anything in your logbook.</li>
+    </ul>
+
+    <h2>Location</h2>
+    <ul>
+      <li>LODGE never asks for Location Services and never reads your iPhone's GPS position. A spot's location is the point you drag the map to.</li>
+      <li>Spot coordinates are stored only on your iPhone. They are sent to Apple only as described under Maps and Weather.</li>
+    </ul>
+
+    <h2>Maps</h2>
+    <ul>
+      <li>The map on a spot's page and in the new spot form is Apple Maps. To draw it, your iPhone asks Apple for the map of the area on screen. That tells Apple which area is being viewed, along with ordinary network details such as your IP address. Unlike the weather request, this is the real area around the spot, not a rounded one. Apple handles this under its own privacy policy.</li>
+      <li>The globe in Spots is drawn on your iPhone and sends nothing.</li>
+    </ul>
+
+    <h2>Weather</h2>
+    <ul>
+      <li>For the 10-day outlook, LODGE asks Apple's weather service for the weather at each saved spot. Before it asks, LODGE rounds the spot's position to about a kilometre. The request contains that rounded position and nothing else from your logbook. Apple handles it under its own privacy policy.</li>
+      <li>The moon and Peak Window parts of a spot's score are worked out on your iPhone.</li>
+    </ul>
+
+    <h2>Photos</h2>
+    <ul>
+      <li>LODGE uses Apple's photo picker, so it only receives the photos you choose. It can't browse your library.</li>
+      <li>LODGE keeps a smaller copy of each photo on your iPhone. That copy doesn't carry the original's embedded location or camera details.</li>
+      <li>"Save to Photos" asks for permission to add images to your library. LODGE uses that permission only to add the share images you make. It doesn't give LODGE access to read your photos.</li>
+    </ul>
+
+    <h2>Find and Apple Intelligence</h2>
+    <ul>
+      <li>Find searches your logbook on your iPhone.</li>
+      <li>When Apple Intelligence is on, your question and a few matching records are given to Apple's on-device language model to write the answer. This happens on your iPhone. We never receive your questions or answers.</li>
+    </ul>
+
+    <h2>Sharing</h2>
+    <ul>
+      <li>Nothing is shared unless you do it. LODGE never posts for you.</li>
+      <li>A session image shows the take, the limits you typed, your caption, the date, the cover photo and, unless you turn it off, the region. It never shows a spot's name or coordinates.</li>
+      <li>A trip sheet shows the plan, your crew's names, the gear list and, unless you turn it off, your spot names. It never shows coordinates.</li>
+      <li>A shared Find answer is plain text and can include spot names, dates and anything else in the answer.</li>
+      <li>Once something is saved to Photos or sent, it is outside LODGE. Where you post or send it has its own privacy rules.</li>
+    </ul>
+
+    <h2>Other people</h2>
+    <ul>
+      <li>Crew names and photos of other people that you add stay on your iPhone like everything else. You are responsible for having their permission, especially before you share a trip sheet or a photo.</li>
+    </ul>
+
+    <h2>Backups</h2>
+    <ul>
+      <li>Your LODGE data is included in your iPhone's iCloud or computer backup, under your Apple Account and Apple's privacy policy. We can't see or reach it.</li>
+    </ul>
+
+    <h2>Deleting your data</h2>
+    <ul>
+      <li>Delete any session, spot, trip, gear or photo in the app, or delete LODGE to remove everything. Data may stay in earlier backups until those backups are replaced.</li>
+    </ul>
+
+    <h2>Requests from others</h2>
+    <ul>
+      <li>We hold no logbook data, so we have nothing to give anyone who asks us for it, including agencies and courts. Your iPhone and its backups are yours to protect.</li>
+    </ul>
+
+    <h2>Apple</h2>
+    <ul>
+      <li>If you've chosen to share data with developers, Apple may give us anonymous totals of downloads, sessions and crashes. We can't link these to you.</li>
+    </ul>
+
+    <h2>Email</h2>
+    <ul>
+      <li>If you email us, we use your email and what you send only to reply, and we delete it when it's no longer needed. Email to us is handled in the United States.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <ul>
+      <li>LODGE isn't directed at children under 13, and we don't knowingly collect information from anyone, including children.</li>
+    </ul>
+
+    <h2>Keeping it private</h2>
+    <ul>
+      <li>Your spots, notes and photos may be sensitive. Anyone who can unlock your iPhone can open LODGE, because the app has no lock of its own. Use a passcode.</li>
+    </ul>
+
+    <h2>If you live outside the United States</h2>
+    <ul>
+      <li><strong>Who is responsible.</strong> analog design, in Oregon, USA, is responsible for the only personal information we handle, which is any email you send us. Everything LODGE stores stays on your iPhone, under your control.</li>
+      <li><strong>Why we handle it.</strong> We use your email only to answer you. It is held in the United States by our email provider.</li>
+      <li><strong>Apple's services.</strong> The map and weather requests LODGE makes to Apple are handled by Apple under its own privacy policy, wherever you are.</li>
+      <li><strong>Your rights.</strong> Depending on where you live, you may have the right to ask for a copy of the personal information we hold about you, to have it corrected or deleted, and to complain to your local data protection authority. Email <a href="mailto:helloanalogdesign@gmail.com?subject=LODGE">helloanalogdesign@gmail.com</a> and we will act on it.</li>
+      <li><strong>What we don't do.</strong> We don't sell personal information, share it for advertising, track you or make automated decisions about you.</li>
+      <li><strong>Age.</strong> If your law sets a minimum age for agreeing to how personal data is handled, a parent or guardian must agree for anyone younger.</li>
+    </ul>
+
+    <h2>Changes</h2>
+    <ul>
+      <li>If a change affects your privacy, we'll post it here with a new effective date before it ships.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <ul>
+      <li><a href="mailto:helloanalogdesign@gmail.com?subject=LODGE">helloanalogdesign@gmail.com</a></li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="terms">
+    <h1>Terms of use</h1>
+    <p class="eyebrow">Effective 24 November 2026.</p>
+
+    <p>These terms are an agreement between you and analog design, a business based in Oregon, USA ("analog design", "we", "us"). By tapping Accept when LODGE first opens, or by downloading or using LODGE, you agree to them. If you don't agree, don't use LODGE.</p>
+    <p><strong>Three things to know before anything else:</strong></p>
+    <ul>
+      <li>LODGE is a logbook. It gives no legal, safety, food, medical, navigation or weather advice (sections 2 to 9).</li>
+      <li>Hunting, fishing, foraging, trapping and travel outdoors can injure or kill you. You do them entirely at your own risk (sections 10, 21 and 22).</li>
+      <li><strong>Section 24 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></li>
+    </ul>
+    <p><strong>1. License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use LODGE on Apple devices you own or control, as the App Store's usage rules allow.</p>
+    <p><strong>2. What LODGE is, and what it isn't.</strong> LODGE is a personal record-keeping tool. Everything in it is either something you typed or a general, automated convenience. LODGE is not, and must never be used as:</p>
+    <ul>
+      <li>a source of hunting, fishing, foraging or trapping regulations;</li>
+      <li>a license, tag, permit, stamp, harvest report, catch record or any other legally required record;</li>
+      <li>a field guide, or a way to identify any fish, bird, animal, mushroom or plant;</li>
+      <li>advice on what is safe to eat or how to prepare it;</li>
+      <li>a weather, marine, river, avalanche, fire or tide forecast, or a warning service;</li>
+      <li>a map for navigation, or a record of property boundaries, ownership, access rights or closures;</li>
+      <li>a guide, outfitter, instructor or trip organizer;</li>
+      <li>a safety, tracking or emergency device.</li>
+    </ul>
+    <p>Nothing in LODGE or on this site is legal, safety, medical, nutritional, veterinary or other professional advice.</p>
+    <p><strong>3. Laws, licenses, seasons and limits.</strong> You alone are responsible for knowing and obeying every law that applies to what you do and where you do it. That includes federal, state, provincial, tribal, local and foreign law on:</p>
+    <ul>
+      <li>seasons and legal hours;</li>
+      <li>bag, possession, size, sex and slot limits;</li>
+      <li>licenses, tags, permits, stamps, and hunter or trapper education;</li>
+      <li>legal methods, gear, bait, ammunition and traps, and trap checking and marking;</li>
+      <li>tagging, reporting, check-in and record-keeping;</li>
+      <li>protected, threatened and endangered species;</li>
+      <li>closed, restricted and private areas;</li>
+      <li>carrying, transporting and storing firearms and bows;</li>
+      <li>transporting, importing, exporting, selling or giving away fish, game, fur and foraged goods;</li>
+      <li>invasive species, and waste of fish and game.</li>
+    </ul>
+    <p>LODGE doesn't contain, know, check or apply any of these rules. In particular:</p>
+    <ul>
+      <li>The "limit" on a harvest is a number you type. LODGE doesn't know the legal limit. "Limit reached", and the limit shown on a card or a share image, only compare your take with your own number.</li>
+      <li>Badges such as "Limit" are labels you choose.</li>
+      <li>LODGE lets you log almost any quantity of any species in its list, on any past date, at any place. Being able to log something doesn't mean it was legal.</li>
+      <li>"Peak Window" and the spot scores describe LODGE's guess about when a spot is productive. They never refer to a legal season.</li>
+      <li>Logging a session in LODGE doesn't satisfy any legal duty to tag, report or record a harvest.</li>
+    </ul>
+    <p>Regulations change often, sometimes in the middle of a season. Check the current official regulations from the agency in charge before every outing. Any fine, penalty, citation, charge, loss of license or privileges, or seizure of equipment, vehicles, fish or game is yours alone.</p>
+    <p><strong>4. The species catalog and Dream Harvest.</strong> LODGE includes a built-in list of about 860 fish, shellfish, birds, mammals, reptiles, mushrooms and plants of the Americas, with a simple silhouette for each. It is a list of names for record-keeping. It isn't an official or scientific reference.</p>
+    <ul>
+      <li>A species being listed doesn't mean it is legal to take, in season, present where you are, abundant, or safe to handle or eat. The catalog includes species that are protected, endangered, closed to harvest, catch-and-release only or restricted in some or all places.</li>
+      <li>Names are common names. They can be wrong or out of date, and the same name can mean different species in different places.</li>
+      <li>Short notes inside a name, such as "limited", "ranch", "cooked", or a state or country, are informal hints. They are incomplete and may be wrong or out of date. A name with no note carries no meaning either.</li>
+      <li>The list offered when you log a session is filtered by a rough guess from your spot's position. It can offer species that don't live near you and leave out ones that do.</li>
+      <li>The silhouettes are decorative, and one shape is reused for many species. Never use them to identify anything.</li>
+      <li>LODGE counts some harvests and weighs others. Those units are ours and don't match any regulation.</li>
+      <li>Dream Harvest is a personal checklist. It isn't a challenge, a recommendation or encouragement to take any species, least of all one that is protected or closed where you are.</li>
+    </ul>
+    <p><strong>5. Foraging and eating what you take.</strong> Eating wild food can make you seriously ill or kill you.</p>
+    <ul>
+      <li>LODGE can't identify a mushroom, plant, berry, seaweed, fish, shellfish or animal, and nothing in it confirms an identification. Many edible species have poisonous look-alikes.</li>
+      <li>Some listed species are safe only when prepared a particular way, only in part, only at certain times, or not safe for some people at all. LODGE doesn't tell you which.</li>
+      <li>LODGE knows nothing about shellfish closures and biotoxins, harmful algal blooms, fish consumption advisories, mercury and other contaminants, pollution, pesticides, parasites, or wildlife diseases such as chronic wasting disease, trichinosis, tularemia and avian influenza.</li>
+      <li>LODGE knows nothing about your allergies, medical conditions, pregnancy or medications.</li>
+      <li>LODGE gives no guidance on field dressing, cooling, storing, cooking or preserving.</li>
+    </ul>
+    <p>Have every wild food identified in person by a qualified expert, check official health advisories, and when in doubt, don't eat it. We aren't responsible for any illness, poisoning, allergic reaction or death, yours or anyone's you feed.</p>
+    <p><strong>6. Spot scores, weather, Peak Window and the moon.</strong> The Spots tab shows a score, a strip of bars, and words such as "on now", "turning on" and "quiet" for each spot. This comes from a simple formula. It isn't a prediction you can rely on.</p>
+    <ul>
+      <li>The Peak Window uses one built-in date window for each kind of spot. It is the same for every new spot of that kind, wherever the spot is. It is never a legal season.</li>
+      <li>For the next 10 days, temperature and rain come from Apple Weather. We don't control it, and it can be wrong, late or unavailable.</li>
+      <li>When Apple has no data for a day, and for every past date, LODGE shows long-term monthly averages for one of four broad climate zones, picked roughly from the spot's position. An average isn't a forecast, and it may have little to do with the real weather at your spot.</li>
+      <li>The moon phase is a low-precision calculation. LODGE gives no tide information.</li>
+      <li>The score knows nothing about river levels and flows, water temperature, surf, bar and ocean conditions, ice, snow, wind, lightning, fire, smoke, avalanche danger, road conditions, closures, fish runs, animal movements or fruiting.</li>
+    </ul>
+    <p>LODGE gives no weather warnings or alerts. Never decide whether it's safe to go out, or to stay out, from anything in LODGE. Use official weather, marine and river forecasts, tide tables and warnings. No catch, harvest or result is promised.</p>
+    <p><strong>7. Maps, spots and access to land and water.</strong></p>
+    <ul>
+      <li>A spot is a pin you place by hand on a small map. Its coordinates are approximate. Don't use them, the map or the globe to navigate, to find your way back, or to tell anyone where to find you.</li>
+      <li>Map and satellite images come from Apple Maps. They can be old, wrong or missing, and they need an internet connection.</li>
+      <li>LODGE shows no property lines, land ownership, public or private status, tribal lands, park or refuge boundaries, safety zones, closures, easements or rights of way. A pin on the map doesn't mean you're allowed to be there, or to hunt, fish, forage, trap, drive, camp or launch there.</li>
+      <li>"Access", "Best when" and other notes are your own words. They can be out of date. Roads, gates, trails, landings and permissions change.</li>
+      <li>Trespass, permission and permits are your responsibility.</li>
+      <li>LODGE calls spots private because they are stored only on your iPhone and left off session images. We can't promise a spot stays secret. Anyone who sees your phone, your backups, your photos, a trip sheet or a shared answer may learn it. We aren't responsible if a spot becomes known, crowded, closed or spoiled.</li>
+    </ul>
+    <p><strong>8. Find and Apple Intelligence.</strong></p>
+    <ul>
+      <li>Find matches your words against your own records with simple keyword rules. It can miss records or match the wrong ones.</li>
+      <li>Written answers are generated by Apple's on-device language model, which we don't make or control. Generated answers can be wrong, incomplete or made up. They can misstate dates, places, counts, limits, gear or people, even though LODGE tells the model to use only your records.</li>
+      <li>Find knows nothing beyond your logbook. It can't answer questions about rules, seasons, safety, identification or what is safe to eat. Ignore anything it says on those subjects.</li>
+      <li>Check every answer against the records listed under it before you rely on it or share it.</li>
+      <li>Find depends on Apple's software and on your device. It may change or stop working.</li>
+    </ul>
+    <p><strong>9. Trips, crew and gear.</strong></p>
+    <ul>
+      <li>A trip in LODGE is a planning note, and a trip sheet is a summary for your crew. Neither is a safety plan, a float plan, a permit, a booking or a complete checklist.</li>
+      <li>A gear list is whatever you typed. It isn't a list of what you need to be safe or legal.</li>
+      <li>Listing or logging gear isn't a statement that it is safe, suitable, legal to own, legal to use or in good condition. That includes firearms, ammunition, bows, knives, traps, bait, lures, vehicles and boats. Follow the maker's instructions and the law.</li>
+      <li>You are responsible for everyone you invite or bring, including children and guests, and for their fitness, training, licenses and safety. analog design isn't a guide, outfitter or organizer and has no part in your trips.</li>
+      <li>Product and brand names you type belong to their owners. We don't test or endorse any product.</li>
+    </ul>
+    <p><strong>10. The outdoors is dangerous: you assume the risk.</strong> Hunting, fishing, foraging, trapping, camping, boating and driving off-road are dangerous. They can cause serious injury, illness, permanent disability and death, to you and to others, and loss of or damage to property. The risks include, among others:</p>
+    <ul>
+      <li>firearms, bows, knives, hooks, spears and traps;</li>
+      <li>drowning, cold water, currents, tides, waves, wading, ice and boats;</li>
+      <li>falls, steep or unstable ground, tree stands, and getting lost or stranded;</li>
+      <li>heat, cold, hypothermia, storms, lightning, flood, fire, smoke and avalanche;</li>
+      <li>wild and domestic animals, insects, ticks, snakes and disease;</li>
+      <li>poisonous plants and fungi, and contaminated or spoiled food;</li>
+      <li>vehicles, off-road driving, trailers and remote roads;</li>
+      <li>other people, including other hunters;</li>
+      <li>being far from help, with no phone signal and no rescue;</li>
+      <li>your own health, fitness, fatigue, skill and judgment, and alcohol or drugs.</li>
+    </ul>
+    <p>YOU CHOOSE TO TAKE PART IN THESE ACTIVITIES. YOU KNOWINGLY AND VOLUNTARILY ASSUME ALL OF THEIR RISKS, WHETHER OR NOT THEY ARE LISTED HERE, AND WHETHER OR NOT YOU USED LODGE BEFORE, DURING OR AFTER THEM. You are responsible for your own training, including hunter and firearm safety education, for carrying proper safety and survival equipment, and for telling a responsible person where you are going and when you'll be back.</p>
+    <p><strong>11. Not a safety device.</strong></p>
+    <ul>
+      <li>LODGE can't call for help, send an alert or share your location. It doesn't track where you are.</li>
+      <li>Don't count on LODGE, or on your phone, working in the field. Batteries die, phones break and get wet, and LODGE's maps need a connection.</li>
+      <li>Don't use LODGE while driving, operating a boat or vehicle, handling a firearm or bow, wading or climbing, or at any time your attention is needed elsewhere.</li>
+      <li>In an emergency, call your local emergency number.</li>
+    </ul>
+    <p><strong>12. Your records.</strong></p>
+    <ul>
+      <li>LODGE's records, totals, ratings and statistics are only as accurate as what you entered, and LODGE can make mistakes in adding them up. They are for your own interest.</li>
+      <li>A LODGE record isn't an official record and isn't proof of anything, including a legal harvest, a personal best or a record catch.</li>
+      <li>You decide what to write down. Your logbook is yours, on your device. What you record, and what happens if someone else sees it or asks you for it, is your responsibility.</li>
+    </ul>
+    <p><strong>13. Sharing.</strong></p>
+    <ul>
+      <li>LODGE makes images and text for you to share. You decide what to share, where and with whom. LODGE never posts for you.</li>
+      <li>Check what an image or text shows before you share it. Session images leave out spot names and coordinates, but the region line, your photo, your caption, the date and the take can still reveal where you were. Trip sheets include your crew's names and, unless you turn it off, your spot names. Shared Find answers can include spot names.</li>
+      <li>You are responsible for everything you share. That means having the right to the photos, having the agreement of the people named or pictured, following the rules of the service you post to, and following the law.</li>
+      <li>Photos and counts of fish and game can draw strong reactions. We aren't responsible for comments, harassment, action taken against your accounts, harm to your reputation, or any use of what you post as evidence.</li>
+      <li>Once you share something, neither we nor LODGE can take it back.</li>
+      <li>The platform names and post sizes on the share screen are there for convenience, and the sizes may be out of date. Instagram, Facebook, Threads, X, TikTok, Pinterest, LinkedIn, Snapchat and YouTube are trademarks of their owners. LODGE isn't affiliated with, endorsed by or sponsored by any of them.</li>
+    </ul>
+    <p><strong>14. Your data is your responsibility.</strong></p>
+    <ul>
+      <li>Your logbook is stored only on your device. There is no account, no sync and no export. We have no copy and can't restore anything.</li>
+      <li>Data can be lost by deleting an item or the app, by losing, breaking or replacing your phone, by a failed update or restore, or by a fault in LODGE or iOS. If LODGE can't open its data when it starts, it may set that data aside and start an empty logbook so that the app can still open.</li>
+      <li>Deletions in LODGE can't be undone.</li>
+      <li>You are responsible for keeping your iPhone backed up and locked. We aren't liable for any loss, corruption or exposure of data, however it happens.</li>
+    </ul>
+    <p><strong>15. Your content and acceptable use.</strong> You own what you put in LODGE. Because it never leaves your device, we don't receive or use it. You agree to use LODGE only for lawful purposes. Don't use it to plan, carry out or promote the illegal taking of wildlife or plants, trespass, or harm to any person. Don't add other people's personal information without their permission.</p>
+    <p><strong>16. Who can use LODGE.</strong> You must be at least 18, or the age of majority where you live, to agree to these terms. If you are younger, you may use LODGE only if a parent or legal guardian has read and agreed to these terms for you, and supervises your use of LODGE and the activities you record in it. That adult accepts these terms, including sections 10 and 20 to 24, for you and for themselves.</p>
+    <p><strong>17. Apple's services and other companies.</strong> LODGE relies on software and services from Apple, including Apple Maps, Apple Weather, Apple Intelligence, Photos and the share sheet. Apple provides them under its own terms and privacy policy. We don't control them. They can change, be wrong, be unavailable or stop, and we aren't responsible for them. The same goes for any other company's service that you send LODGE content to.</p>
+    <p><strong>18. Our property.</strong> LODGE and its design, code, name, logo, icons, silhouettes, built-in backdrop photos and species catalog as compiled belong to analog design or its licensors and are protected by law. You may not copy, extract, modify, distribute, sell, rent, reverse engineer, decompile or make derivative works of LODGE or any part of it, except where the law expressly allows despite this restriction. Share images you make with LODGE may include the LODGE name and mark and a built-in backdrop. You may share those images as LODGE makes them.</p>
+    <p><strong>19. Price.</strong> The price of LODGE, if any, is the one shown on its App Store page when you get it. Apple handles all payments and refunds.</p>
+    <p><strong>20. Disclaimer of warranties.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, LODGE AND THIS SITE ARE PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, QUIET ENJOYMENT AND NON-INFRINGEMENT. WE DON'T WARRANT THAT ANY SPECIES NAME OR NOTE, LIMIT, SEASON LABEL, FORECAST, WEATHER FIGURE, MOON OR TIDE LABEL, MAP, COORDINATE, RATING, TOTAL, SEARCH RESULT OR GENERATED ANSWER IS ACCURATE, COMPLETE, CURRENT, LAWFUL TO ACT ON OR SAFE TO RELY ON. WE DON'T WARRANT THAT LODGE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE OR COMPATIBLE WITH YOUR DEVICE, THAT YOUR DATA WILL BE PRESERVED, THAT A SPOT WILL STAY PRIVATE, OR THAT DEFECTS WILL BE FIXED. NO ADVICE OR INFORMATION FROM US, IN THE APP, ON THIS SITE OR BY EMAIL, CREATES A WARRANTY.</p>
+    <p><strong>21. Limitation of liability.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, ANALOG DESIGN AND ITS OWNERS, MEMBERS, EMPLOYEES, CONTRACTORS AND AGENTS WILL NOT BE LIABLE FOR ANY OF THE FOLLOWING, ARISING FROM OR RELATED TO LODGE, THIS SITE OR THESE TERMS, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, INCLUDING NEGLIGENCE, EVEN IF WE WERE TOLD THEY WERE POSSIBLE:</p>
+    <ul>
+      <li>PERSONAL INJURY, ILLNESS, POISONING, DISABILITY OR DEATH;</li>
+      <li>DAMAGE TO OR LOSS OF PROPERTY, INCLUDING VEHICLES, BOATS, FIREARMS AND GEAR;</li>
+      <li>FINES, PENALTIES, CITATIONS, CIVIL OR CRIMINAL CHARGES, LEGAL FEES, LOSS OF LICENSES OR PRIVILEGES, AND SEIZURE OR FORFEITURE OF ANYTHING;</li>
+      <li>TRESPASS AND OTHER CLAIMS BY LANDOWNERS, AGENCIES OR OTHER PEOPLE;</li>
+      <li>LOSS, CORRUPTION OR EXPOSURE OF DATA, AND THE DISCLOSURE OF ANY SPOT;</li>
+      <li>THE COST OF TRIPS, TRAVEL, LICENSES, TAGS, GUIDES, GEAR OR TIME, AND MISSED OR FAILED OUTINGS;</li>
+      <li>LOST PROFITS, REVENUE, GOODWILL OR OPPORTUNITY;</li>
+      <li>ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY OR PUNITIVE DAMAGES.</li>
+    </ul>
+    <p>OUR TOTAL LIABILITY FOR ALL CLAIMS WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID FOR LODGE IN THE 12 MONTHS BEFORE THE CLAIM, OR US$10. THESE LIMITS APPLY EVEN IF A REMEDY FAILS OF ITS ESSENTIAL PURPOSE. Some places don't allow certain exclusions or limits, so some of these may not apply to you. Where that is the case, our liability is limited to the smallest amount the law allows.</p>
+    <p><strong>22. Release.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, YOU RELEASE AND FOREVER DISCHARGE ANALOG DESIGN AND ITS OWNERS, MEMBERS, EMPLOYEES, CONTRACTORS AND AGENTS FROM EVERY CLAIM, DEMAND AND CAUSE OF ACTION, KNOWN OR UNKNOWN, ARISING FROM OR RELATED TO YOUR OUTDOOR ACTIVITIES, YOUR TRIPS AND THE PEOPLE ON THEM, WHAT YOU TAKE, HANDLE, EAT OR SERVE, WHERE YOU GO, AND WHAT YOU SHARE, INCLUDING CLAIMS BASED ON OUR NEGLIGENCE. This release also binds your family, heirs, estate and anyone claiming through you. You waive California Civil Code section 1542 and any similar law that limits a general release of unknown claims. This release doesn't cover claims that the law doesn't allow you to release.</p>
+    <p><strong>23. Indemnity.</strong> To the extent the law allows, you agree to defend, indemnify and hold harmless analog design and its owners, members, employees, contractors and agents from any claim, loss, liability, damage, fine, cost or expense, including reasonable legal fees, arising from:</p>
+    <ul>
+      <li>your use or misuse of LODGE;</li>
+      <li>your outdoor activities and trips;</li>
+      <li>any breach of law by you, including wildlife, firearms, trespass, food and privacy law;</li>
+      <li>anything you share, post or send;</li>
+      <li>any claim by your crew, guests, family, or anyone you give or serve fish, game or foraged food to;</li>
+      <li>your breach of these terms.</li>
+    </ul>
+    <p><strong>24. Disputes and arbitration.</strong> Before filing any claim, email <a href="mailto:helloanalogdesign@gmail.com?subject=LODGE">helloanalogdesign@gmail.com</a> describing it, and give us 60 days to try to resolve it. If we can't, you and we agree that any dispute arising from or related to LODGE, this site or these terms will be resolved by <strong>binding individual arbitration</strong> administered by the American Arbitration Association under its Consumer Arbitration Rules, except that either side may bring an individual claim in small claims court. <strong>YOU AND WE WAIVE ANY RIGHT TO A JURY TRIAL AND TO TAKE PART IN A CLASS, COLLECTIVE OR REPRESENTATIVE ACTION.</strong> The arbitrator may award relief only to you individually. You may opt out of this section by emailing us within 30 days of first using LODGE, with your name and a statement that you opt out. If this section doesn't apply, claims go only to the state or federal courts in Oregon, and you and we consent to their jurisdiction.</p>
+    <p><strong>25. Time limit.</strong> Any claim must be brought within one year after it arises, or it is permanently barred, to the extent the law allows.</p>
+    <p><strong>26. Governing law.</strong> These terms are governed by the laws of the State of Oregon, USA, and the Federal Arbitration Act, without regard to conflict-of-law rules. The UN Convention on Contracts for the International Sale of Goods doesn't apply.</p>
+    <p><strong>27. Apple.</strong> These terms are between you and analog design, not Apple. Apple has no obligation to provide maintenance or support for LODGE. If LODGE fails to meet any applicable warranty, you may notify Apple for a refund of the purchase price, if any, and Apple has no other warranty obligation. We, not Apple, are responsible for any product claims, consumer protection claims or intellectual property claims about LODGE, to the extent these terms don't disclaim them. Apple and its subsidiaries are third-party beneficiaries of these terms and may enforce them against you. You confirm that you aren't in a country under a US government embargo and aren't on any US government list of prohibited or restricted parties.</p>
+    <p><strong>28. Use outside the United States.</strong> LODGE is operated from Oregon, USA. Its catalog covers parts of the Americas, but we make no claim that LODGE is appropriate or lawful to use in any particular place. You are responsible for the laws where you are, including laws on hunting, fishing, foraging and trapping, on recording a harvest, and on photographing or publishing one.</p>
+    <p><strong>29. Changes and ending.</strong> We may update these terms. We'll post the new version here with a new effective date. LODGE may ask you to accept the new version before you can continue. If you keep using LODGE after that, you accept the update. We may change, stop offering or stop supporting LODGE at any time. Your license ends automatically if you break these terms. Every section that by its nature should survive does, including sections 2 to 15 and 17 to 30.</p>
+    <p><strong>30. General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. "Including" means "including without limitation", and the lists and examples in these terms aren't complete. Headings are for convenience. If these terms conflict with anything in the app or elsewhere on this page, these terms govern. These terms and the EULA are the whole agreement about LODGE.</p>
+    <p><strong>International users: your local rights.</strong> This section applies if you live outside the United States. It is part of these terms, and where it conflicts with another section, this section wins.</p>
+    <ul>
+      <li><strong>Your local rights stay.</strong> Nothing in these terms takes away a right that the law of the country where you live gives you as a consumer and doesn't allow a contract to remove. If part of these terms isn't allowed where you live, that part doesn't apply to you, and the rest still does.</li>
+      <li><strong>Limits on our liability.</strong> We don't exclude or limit our liability where your law doesn't allow it. Depending on where you live, that can include liability for death or personal injury caused by negligence, for fraud, and for intentional or grossly negligent acts. Every other exclusion and limit in these terms, including the assumption of risk and the release, applies as far as your law allows.</li>
+      <li><strong>Guarantees that can't be excluded.</strong> Some countries, including those of the European Union, the United Kingdom and Australia, give consumers guarantees about digital products that can't be excluded. The "as is" wording in these terms doesn't remove them. Where your law lets us limit what we owe under such a guarantee, we limit it to supplying LODGE again or refunding what you paid for it.</li>
+      <li><strong>Disputes.</strong> If your law doesn't allow the arbitration agreement, the class-action waiver, the one-year time limit or the choice of Oregon courts to bind you, they don't bind you, and you may bring a claim in the courts of the country where you live. Oregon law governs these terms, and you also keep the protection of the mandatory law of the country where you live.</li>
+      <li><strong>Purchases and refunds.</strong> Apple provides LODGE to you through the App Store and handles any payment. Any right your law gives you to cancel a purchase or get a refund is exercised through Apple.</li>
+      <li><strong>Language.</strong> These terms and LODGE's screens are in English. If we ever provide a translation, the English version governs as far as your law allows.</li>
+      <li><strong>Local law.</strong> Section 28 applies wherever you are. Hunting, fishing, foraging, trapping, firearms and wildlife law differ in every country, and LODGE knows none of it.</li>
+      <li><strong>Availability.</strong> We choose which countries LODGE is offered in and may withdraw it from any country at any time.</li>
+    </ul>
+    <p><strong>Contact:</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=LODGE">helloanalogdesign@gmail.com</a></p>
+  </section>
+</main>
+<footer>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
+</footer>
+</body>
+</html>

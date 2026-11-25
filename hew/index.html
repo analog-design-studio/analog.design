@@ -20,14 +20,25 @@
     flex-direction: column;
   }
   main {
-    width: 100%;
-    max-width: 1280px;            /* fills the screen; a soft cap on very wide monitors */
-    padding: 72px 48px 96px;      /* same gutter as the home page */
+    width: 100%;                  /* always the full width of the window, whatever its size */
+    padding: 0 48px 96px;         /* no top padding: the phone hangs from the very top of the page */
     flex: 1;
   }
-  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 64px; }
-  .mark { display: block; }
-  .mark img { display: block; width: clamp(150px, 17vw, 240px); height: auto; }
+  /* hero: the top of the phone hangs upside down from the top of the page; Hew on the left,
+     the App Store button on the right with the tagline under it */
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: "mark phone store" ". phone words";
+    column-gap: clamp(24px, 4vw, 64px);
+    margin-bottom: clamp(56px, 7vw, 96px);
+    --big: clamp(46px, 6.3vw, 98px);     /* one size for Hew and for Goals Habits Tasks Period */
+  }
+  /* Hew and the tagline are the same type: Helvetica Neue Bold, set tight, as on the app icon */
+  .mark, .words { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 700; font-size: var(--big); line-height: 0.92; letter-spacing: -0.041em; color: var(--ink); }
+  .mark { grid-area: mark; display: block; margin-top: 72px; justify-self: start; text-decoration: none; }
+  .phone { grid-area: phone; align-self: start; display: block; width: clamp(250px, 29vw, 390px); height: auto; }
+  .words { grid-area: words; justify-self: end; text-align: right; margin: clamp(24px, 3vw, 44px) 0 0; }
   .store {
     display: inline-block;
     padding: 13px 20px;
@@ -38,6 +49,7 @@
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
+    grid-area: store; justify-self: end; align-self: start; margin-top: 72px;
   }
   .store:hover { background: #000; }
 
@@ -49,8 +61,8 @@
     color: var(--muted);
     margin-bottom: 20px;
   }
-  p { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 24px; }
-  p.lead { font-size: clamp(21px, 1.2vw + 12px, 34px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 52px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
   p.lead strong { font-weight: 700; }
 
   /* sections: Support, Privacy policy, Terms of use */
@@ -67,7 +79,7 @@
     border-top: 1px solid var(--line);
   }
   ul { margin: 0 0 24px 1.2em; }
-  li { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 10px; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 10px; }
   li::marker { color: var(--ink); }
   ol { margin: 0 0 24px 1.7em; }
   ol li { padding-left: 6px; margin-bottom: 18px; }
@@ -75,26 +87,38 @@
   a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(18,19,13,0.5); }
   a:hover { text-decoration-color: var(--ink); }
 
-  /* ---- analog logo, bottom left, on every page ----------------------- */
+  /* ---- analog design studio logo, bottom left, on every page ----------------------- */
   footer { width: 100%; padding: 0 48px 48px; }
   .wordmark { display: inline-block; }
-  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
-  @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "phone phone" "mark store" "words words"; align-items: center; column-gap: 16px; row-gap: 32px; --big: clamp(44px, 14vw, 96px); }
+    .phone { justify-self: center; width: min(74vw, 320px); }
+    .mark, .store { margin-top: 0; }
+    .store { align-self: center; padding: 11px 14px; font-size: 13px; }
+    .words { margin-top: 0; }
+  }
+  @media (max-width: 400px) {   /* very narrow phones: Hew, then the button under it */
+    .hero { grid-template-columns: minmax(0, 1fr); grid-template-areas: "phone" "mark" "store" "words"; row-gap: 24px; }
+    .mark { justify-self: start; }
+  }
+  @media (max-width: 640px) { main { padding: 0 24px 64px; } footer { padding: 0 24px 32px; } }
 </style>
 </head>
 <body>
 <main>
-  <header class="top">
-    <a class="mark" href="/hew/" aria-label="Hew">
-      <img src="/hew/mark.svg" alt="Hew">
-    </a>
-    <a class="store" href="https://apps.apple.com/us/app/hew-goals-habits-tasks-period/id6836979960">Download from the App Store</a>  </header>
+  <header class="hero">
+    <a class="mark" href="/hew/">Hew</a>
+    <img class="phone" src="/hew/phone.png" alt="The top of the Hew app on an iPhone, upside down">
+    <a class="store" href="https://apps.apple.com/us/app/hew-goals-habits-tasks-period/id6836979960">Download from the App Store</a>
+    <p class="words">Goals<br>Habits<br>Tasks<br>Period</p>
+  </header>
 
   <p class="eyebrow">Hew for iPhone · iOS 17 and later</p>
 
   <p class="lead"><strong>Hew</strong> puts goals, habits and tasks in one list. Set a goal, attach the habits and tasks that get you there, and check them off each day. Hew shows your streaks, a calendar of what you did, and insights over any time frame. No account. Nothing leaves your phone.</p>
 
-  <p><strong>Requirements:</strong> iPhone with iOS 17 or later. Reordering groups needs iOS 18 or later. Hew is a one-time purchase on the App Store, not a subscription.</p>
+  <p><strong>Requirements:</strong> iPhone with iOS 17 or later. Reordering groups needs iOS 18 or later. The price is shown on Hew's App Store page.</p>
 
   <!-- ================================================================ -->
   <section id="support">
@@ -147,7 +171,7 @@
   <!-- ================================================================ -->
   <section id="privacy">
     <h1>Privacy policy</h1>
-    <p class="eyebrow">Effective 19 November 2026.</p>
+    <p class="eyebrow">Effective 24 November 2026.</p>
 
     <p>Hew is made by analog design ("we", "us"). This policy covers the Hew app for iPhone and this page.</p>
 
@@ -164,14 +188,23 @@
       <li><strong>Changes.</strong> If a change affects your privacy, we'll post it here with a new effective date before it ships.</li>
       <li><strong>Contact.</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=Hew">helloanalogdesign@gmail.com</a></li>
     </ul>
+
+    <h2>If you live outside the United States</h2>
+    <ul>
+      <li><strong>Who is responsible.</strong> analog design, in Oregon, USA, is responsible for the only personal information we handle, which is any email you send us. Everything Hew stores stays on your iPhone, under your control.</li>
+      <li><strong>Why we handle it.</strong> We use your email only to answer you. It is held in the United States by our email provider.</li>
+      <li><strong>Your rights.</strong> Depending on where you live, you may have the right to ask for a copy of the personal information we hold about you, to have it corrected or deleted, and to complain to your local data protection authority. Email <a href="mailto:helloanalogdesign@gmail.com?subject=Hew">helloanalogdesign@gmail.com</a> and we will act on it.</li>
+      <li><strong>What we don't do.</strong> We don't sell personal information, share it for advertising, track you or make automated decisions about you.</li>
+      <li><strong>Age.</strong> If your law sets a minimum age for agreeing to how personal data is handled, a parent or guardian must agree for anyone younger.</li>
+    </ul>
   </section>
 
   <!-- ================================================================ -->
   <section id="terms">
     <h1>Terms of use</h1>
-    <p class="eyebrow">Effective 19 November 2026.</p>
+    <p class="eyebrow">Effective 24 November 2026.</p>
 
-    <p>These terms are an agreement between you and Blake Ziolkowski, an individual in Oregon doing business as analog design ("analog design", "we", "us"). By downloading or using Hew, you agree to them. If you don't agree, don't use Hew. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
+    <p>These terms are an agreement between you and analog design, a business based in Oregon, USA ("analog design", "we", "us"). By downloading or using Hew, you agree to them. If you don't agree, don't use Hew. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
 
     <ol>
       <li><strong>License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use Hew on Apple devices you own or control, as the App Store's usage rules allow.</li>
@@ -193,11 +226,23 @@
       <li><strong>General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. These terms and the EULA are the whole agreement about Hew.</li>
     </ol>
 
+    <p><strong>International users: your local rights.</strong> This section applies if you live outside the United States. It is part of these terms, and where it conflicts with another section, this section wins.</p>
+    <ul>
+      <li><strong>Your local rights stay.</strong> Nothing in these terms takes away a right that the law of the country where you live gives you as a consumer and doesn't allow a contract to remove. If part of these terms isn't allowed where you live, that part doesn't apply to you, and the rest still does.</li>
+      <li><strong>Limits on our liability.</strong> We don't exclude or limit our liability where your law doesn't allow it. Depending on where you live, that can include liability for death or personal injury caused by negligence, for fraud, and for intentional or grossly negligent acts. Every other exclusion and limit in these terms applies as far as your law allows.</li>
+      <li><strong>Guarantees that can't be excluded.</strong> Some countries, including those of the European Union, the United Kingdom and Australia, give consumers guarantees about digital products that can't be excluded. The "as is" wording in these terms doesn't remove them. Where your law lets us limit what we owe under such a guarantee, we limit it to supplying Hew again or refunding what you paid for it.</li>
+      <li><strong>Disputes.</strong> If your law doesn't allow the arbitration agreement, the class-action waiver, the one-year time limit or the choice of Oregon courts to bind you, they don't bind you, and you may bring a claim in the courts of the country where you live. Oregon law governs these terms, and you also keep the protection of the mandatory law of the country where you live.</li>
+      <li><strong>Purchases and refunds.</strong> Apple provides Hew to you through the App Store and handles any payment. Any right your law gives you to cancel a purchase or get a refund is exercised through Apple.</li>
+      <li><strong>Language.</strong> These terms and Hew's screens are in English. If we ever provide a translation, the English version governs as far as your law allows.</li>
+      <li><strong>Local law.</strong> Hew is operated from Oregon, USA. We make no promise that it is appropriate or lawful to use where you are, and you are responsible for following the law there.</li>
+      <li><strong>Availability.</strong> We choose which countries Hew is offered in and may withdraw it from any country at any time.</li>
+    </ul>
+
     <p><strong>Contact:</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=Hew">helloanalogdesign@gmail.com</a></p>
   </section>
 </main>
 <footer>
-  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
 </footer>
 </body>
 </html>

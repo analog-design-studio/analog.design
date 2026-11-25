@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>analog design</title>
+<title>analog design studio</title>
 <meta name="description" content="analog design — a small design studio. Apps, and sometimes objects.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
@@ -22,7 +22,7 @@
   /* ---- the logo grid ------------------------------------------------- */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 200px);
+    grid-template-columns: repeat(3, 200px);     /* six logos: three across, two down */
     gap: 48px 64px;
   }
   .logo {
@@ -50,11 +50,13 @@
   .logo.roam img  { width: 150px; }
   .logo.way img   { width: 150px; }
   .logo.hew img   { width: 136px; }
+  .logo.lodge img { width: 150px; }   /* the horns alone, in LODGE brown once hovered */
+  .logo.summed img { width: 168px; }  /* the icon has white space around the S., so it runs larger */
 
   /* ---- wordmark, bottom left ---------------------------------------- */
   footer { padding: 0 48px 48px; }
   .wordmark { display: inline-block; }
-  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
 
   @media (max-width: 640px) {
     main { padding: 40px 24px 32px; }
@@ -65,6 +67,8 @@
     .logo.roam img  { width: 104px; }
     .logo.way img   { width: 104px; }
     .logo.hew img   { width: 94px; }
+    .logo.lodge img { width: 104px; }
+    .logo.summed img { width: 116px; }
   }
 </style>
 </head>
@@ -88,10 +92,16 @@
     <a class="logo hew" href="/hew/" title="Hew">
       <img src="/hew/icon.svg" alt="Hew">
     </a>
+    <a class="logo lodge" href="/LODGE/" title="LODGE">
+      <img src="/LODGE/horns.png" alt="LODGE">
+    </a>
+    <a class="logo summed" href="/Summed/" title="Summed.">
+      <img src="/Summed/icon.png" alt="Summed.">
+    </a>
   </nav>
 </main>
 <footer>
-  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
 </footer>
 </body>
 </html>

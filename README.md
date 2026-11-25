@@ -10,8 +10,9 @@ is what's live.
 CNAME                   tells GitHub Pages the site lives at analog.design
 .nojekyll               (already in the repo) tells GitHub Pages to publish the files as they are
 index.html              the logo grid
-favicon.svg             browser-tab icon for the home page: the "a" from the analog logo
-logo.svg                the analog logo, bottom-left on every page (links home)
+404.html                sends other spellings of an address (/lodge, /WAY) to the right folder
+favicon.svg             browser-tab icon: the "a" from the studio logo
+logo.svg                the analog design studio logo, bottom-left on every page (links home)
 golfa/
   index.html            one scrollable page: description → #privacy → #terms
   assets/golfer.svg     the mark used on the grid
@@ -19,7 +20,7 @@ golfa/
   privacy/index.html    redirect → /golfa/#privacy
 roam/
   index.html            one scrollable page: description → #features → #support → #privacy → #terms
-  sphere.svg            the mark used on the grid
+  sphere.svg            the sphere, used on the grid and in the middle of the roam page
   wordmark.svg          the horizontal mark at the top of the roam page
   icon.png              app icon (used as the page's favicon)
   privacy/index.html    redirect → /roam/#privacy
@@ -28,10 +29,21 @@ way/
   index.html            one scrollable page: description → #support → #privacy → #terms
   mark.svg              the colour-wheel mark, used on the grid and at the top of the Way page
   mark-offwhite.svg     the same mark in off-white, for dark backgrounds (not used yet)
+  pattern.svg           the wheels in offset rows, tiled behind the whole Way page
 hew/
   index.html            one scrollable page: description → #support → #privacy → #terms
   icon.svg              the app icon (charcoal "Hew" bottom left on orange), used on the grid and as the tab icon
-  mark.svg              the charcoal wordmark alone, used at the top of the orange Hew page
+  mark.svg              the charcoal wordmark alone as a picture (not used: the Hew page now sets "Hew" as text, to match its tagline)
+  phone.png             the iPhone that peeks down from the top of the Hew page
+LODGE/
+  index.html            one scrollable page: description → #support → #privacy → #terms
+  icon.png              the app icon (antlers on brown), used as the LODGE page's tab icon
+  horns-white.png       the antlers alone in white, at the top of the LODGE page
+  horns.png             the antlers alone in LODGE's dark brown, used on the grid
+Summed/
+  index.html            one scrollable page: description → #support → #privacy → #terms
+  icon.png              the app icon ("S."), used on the grid, at the top of the Summed page and as its tab icon
+  fonts/                Cardo Regular and Bold (Latin only) for Summed's serif titles, with its licence (OFL.txt)
 ```
 
 Folder + `index.html` means the URLs are clean: `analog.design/way/`,
@@ -51,10 +63,29 @@ below, in the order it appears on screen.
 
 ## App Store buttons
 
-roam and Way have a "Download from the App Store" button at the top right of
-their pages: the `<a class="store" href="…">` line inside `<header class="top">`.
-To add one to another page (Hew has a commented-out line ready), put the same
-line there with that app's App Store link.
+roam, Way and Hew each have a "Download from the App Store" button at the top
+right of their pages: the `<a class="store" href="…">` line near the top of the
+page. golfa, LODGE and Summed have none. To add one once an app is approved,
+copy that line into the page's `<header class="top">`, after the logo's
+closing `</a>`, with the app's own App Store link.
+
+## Addresses and capital letters
+
+GitHub Pages treats capitals as different addresses. The apps link to
+`analog.design/LODGE/` and `analog.design/Summed/`, so those two folders keep
+their capitals. `404.html` sends any other spelling (`/lodge`, `/summed`,
+`/WAY`, `/Hew`) to the right folder. When you add a project, add its folder
+name to the list at the top of `404.html`.
+
+## Page backgrounds
+
+- **roam**: the stars are drawn by the script at the bottom of
+  `roam/index.html`, using the app's own star list and seed. `SIZE`, `ALPHA`
+  and `TURN` near the top of that script set how big, how bright and how fast
+  they turn as you scroll.
+- **Way**: the wheels are `way/pattern.svg`, tiled by the `body::before` rule
+  at the top of `way/index.html`. `opacity` sets how faded they are.
+- **Hew**: the phone is `hew/phone.png`, cut from the Instagram artwork.
 
 ## Adding a project
 

@@ -7,7 +7,7 @@
 <meta name="description" content="roam is the simplest alarm clock ever. Alarms belong to places: set one in a time zone and it rings only while you're there. Features, support, privacy and terms of use.">
 <link rel="icon" href="/roam/icon.png" type="image/png">
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: dark; --orange: #FF5412; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   html, body { background: #000; color: #fff; }
@@ -19,12 +19,18 @@
     flex-direction: column;
   }
   main {
-    width: 100%;
-    max-width: 1280px;            /* fills the screen; a soft cap on very wide monitors */
+    width: 100%;                  /* always the full width of the window, whatever its size */
     padding: 72px 48px 96px;      /* same gutter as the home page */
     flex: 1;
   }
-  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 72px; }
+  /* the sky: a canvas pinned behind the whole page; the script at the bottom of this file draws the stars */
+  #sky { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  main, footer { position: relative; z-index: 1; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 48px; }
+  /* hero: the sphere among the stars, captioned like the 1.2 announcement */
+  .hero { margin-bottom: clamp(64px, 8vw, 112px); }
+  .sphere { display: block; width: clamp(200px, 30vw, 420px); height: auto; margin: 0 auto clamp(48px, 7vw, 104px); }
+  .intro { display: flex; justify-content: space-between; margin: 0; color: var(--orange); font-weight: 300; font-size: clamp(20px, 1.5vw + 12px, 36px); line-height: 1; }
   .mark { display: block; }
   .store {
     display: inline-block;
@@ -46,8 +52,8 @@
     color: rgba(255,255,255,0.5);
     margin-bottom: 20px;
   }
-  p { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 24px; }
-  p.lead { font-size: clamp(21px, 1.2vw + 12px, 34px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 52px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
   h1 {
     font-weight: 900;
     font-size: clamp(22px, 1vw + 14px, 32px);
@@ -65,8 +71,8 @@
   section { padding-top: 96px; }
   section > h1 + ul { margin-top: 32px; }
   ul { margin: 0 0 24px 1.2em; }
-  li { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 14px; padding-left: 6px; }
-  li::marker { color: rgba(255,255,255,0.5); }
+  li { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 14px; padding-left: 6px; }
+  li::marker { color: var(--orange); }
   ol { margin: 0 0 24px 1.7em; }
   ol li { padding-left: 6px; margin-bottom: 18px; }
   ol li::marker { font-weight: 700; }
@@ -74,14 +80,15 @@
   a { color: #fff; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(255,255,255,0.5); }
   a:hover { text-decoration-color: #fff; }
 
-  /* ---- analog design wordmark, bottom left, on every page ------------ */
+  /* ---- analog design studio logo, bottom left, on every page ------------ */
   footer { width: 100%; padding: 0 48px 48px; }
   .wordmark { display: inline-block; }
-  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
   @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
 </style>
 </head>
 <body>
+<canvas id="sky" aria-hidden="true"></canvas>
 <main>
   <header class="top">
     <a class="mark" href="/roam/" aria-label="roam">
@@ -89,6 +96,11 @@
     </a>
     <a class="store" href="https://apps.apple.com/us/app/roam-one-tap-travel-alarms/id6830828485">Download from the App Store</a>
   </header>
+
+  <div class="hero">
+    <img class="sphere" src="/roam/sphere.svg" alt="">
+    <p class="intro"><span>introducing</span><span>v1.2</span></p>
+  </div>
 
   <p class="eyebrow">roam for iPhone · iOS 26 and later</p>
 
@@ -131,37 +143,33 @@
   <!-- ================================================================ -->
   <section id="privacy">
     <h1>Privacy</h1>
-    <p class="eyebrow">Effective 2 November 2026</p>
+    <p class="eyebrow">Effective 24 November 2026. Replaces the version of 2 November 2026.</p>
 
-    <p class="lead">Everything you put into roam stays on your phone. Nothing is sent anywhere. Nothing is collected.</p>
+    <ul>
+      <li>Alarms and settings are stored only on your phone.</li>
+      <li>roam reads only your phone's current time zone. It does not use GPS or location services.</li>
+      <li>The app has no server, account, sign-in or analytics, and makes no network connections.</li>
+      <li>It requests one permission: scheduling alarms.</li>
+      <li>The app is not directed at children and collects no information from anyone.</li>
+      <li>Policy changes will be posted on this page with a new effective date. Questions go to <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a>.</li>
+    </ul>
 
-    <h2>What roam stores</h2>
-    <p>Your alarms, their names and tones, the days you've chosen for each zone, and a small count of which times you set most often. All of it lives in one file on your iPhone and goes with the app if you delete it.</p>
-
-    <h2>What roam reads</h2>
-    <p>Your phone's current time zone, so it knows which alarms to arm. roam does not use GPS, does not ask for your location, and does not know where you are beyond the zone your phone reports.</p>
-
-    <h2>What roam sends</h2>
-    <p>Nothing. roam has no server, no account, no sign-in and no analytics. It makes no network connections of its own.</p>
-
-    <h2>Permissions</h2>
-    <p>roam asks iOS for one permission: to schedule alarms. That is what lets it ring while your phone is locked. You can withdraw it at any time in Settings.</p>
-
-    <h2>Children</h2>
-    <p>roam is not directed at children and collects no information from anyone, of any age.</p>
-
-    <h2>Changes</h2>
-    <p>If this policy ever changes, the new version will be posted here with a new effective date.</p>
-
-    <h2>Questions</h2>
-    <p>Write to <a href="mailto:helloanalogdesign@gmail.com">helloanalogdesign@gmail.com</a>.</p>
+    <h2>If you live outside the United States</h2>
+    <ul>
+      <li><strong>Who is responsible.</strong> analog design, in Oregon, USA, is responsible for the only personal information we handle, which is any email you send us. Everything roam stores stays on your iPhone, under your control.</li>
+      <li><strong>Why we handle it.</strong> We use your email only to answer you. It is held in the United States by our email provider.</li>
+      <li><strong>Your rights.</strong> Depending on where you live, you may have the right to ask for a copy of the personal information we hold about you, to have it corrected or deleted, and to complain to your local data protection authority. Email <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a> and we will act on it.</li>
+      <li><strong>What we don't do.</strong> We don't sell personal information, share it for advertising, track you or make automated decisions about you.</li>
+      <li><strong>Age.</strong> If your law sets a minimum age for agreeing to how personal data is handled, a parent or guardian must agree for anyone younger.</li>
+    </ul>
   </section>
+
   <!-- ================================================================ -->
   <section id="terms">
     <h1>Terms of use</h1>
-    <p class="eyebrow">Effective 19 November 2026.</p>
+    <p class="eyebrow">Effective 24 November 2026.</p>
 
-    <p>These terms are an agreement between you and Blake Ziolkowski, an individual in Oregon doing business as analog design ("analog design", "we", "us"). By downloading or using roam, you agree to them. If you don't agree, don't use roam. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
+    <p>These terms are an agreement between you and analog design, a business based in Oregon, USA ("analog design", "we", "us"). By downloading or using roam, you agree to them. If you don't agree, don't use roam. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
 
     <ol>
       <li><strong>License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use roam on Apple devices you own or control, as the App Store's usage rules allow.</li>
@@ -183,11 +191,97 @@
       <li><strong>General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. These terms and the EULA are the whole agreement about roam.</li>
     </ol>
 
+    <p><strong>International users: your local rights.</strong> This section applies if you live outside the United States. It is part of these terms, and where it conflicts with another section, this section wins.</p>
+    <ul>
+      <li><strong>Your local rights stay.</strong> Nothing in these terms takes away a right that the law of the country where you live gives you as a consumer and doesn't allow a contract to remove. If part of these terms isn't allowed where you live, that part doesn't apply to you, and the rest still does.</li>
+      <li><strong>Limits on our liability.</strong> We don't exclude or limit our liability where your law doesn't allow it. Depending on where you live, that can include liability for death or personal injury caused by negligence, for fraud, and for intentional or grossly negligent acts. Every other exclusion and limit in these terms applies as far as your law allows.</li>
+      <li><strong>Guarantees that can't be excluded.</strong> Some countries, including those of the European Union, the United Kingdom and Australia, give consumers guarantees about digital products that can't be excluded. The "as is" wording in these terms doesn't remove them. Where your law lets us limit what we owe under such a guarantee, we limit it to supplying roam again or refunding what you paid for it.</li>
+      <li><strong>Disputes.</strong> If your law doesn't allow the arbitration agreement, the class-action waiver, the one-year time limit or the choice of Oregon courts to bind you, they don't bind you, and you may bring a claim in the courts of the country where you live. Oregon law governs these terms, and you also keep the protection of the mandatory law of the country where you live.</li>
+      <li><strong>Purchases and refunds.</strong> Apple provides roam to you through the App Store and handles any payment. Any right your law gives you to cancel a purchase or get a refund is exercised through Apple.</li>
+      <li><strong>Language.</strong> These terms and roam's screens are in English. If we ever provide a translation, the English version governs as far as your law allows.</li>
+      <li><strong>Local law.</strong> roam is operated from Oregon, USA. We make no promise that it is appropriate or lawful to use where you are, and you are responsible for following the law there.</li>
+      <li><strong>Availability.</strong> We choose which countries roam is offered in and may withdraw it from any country at any time.</li>
+    </ul>
+
     <p><strong>Contact:</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=roam">helloanalogdesign@gmail.com</a></p>
   </section>
 </main>
 <footer>
-  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
 </footer>
+<script>
+/* The stars are the app's own (Sky.swift and GlobeView.swift): the 73 brightest real stars
+   plus a fixed, seeded field of faint flecks, drawn as tiny squares in three brightness
+   steps and placed for the current sidereal time. On this page the sky fills the window
+   and turns slowly as you scroll. */
+(function () {
+  var canvas = document.getElementById('sky');
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext('2d'), D2R = Math.PI / 180;
+
+  // (right ascension in hours, declination in degrees, magnitude)
+  var BRIGHT = [
+    [6.75,-16.7,-1.5],[6.4,-52.7,-0.7],[14.26,19.2,0],[18.62,38.8,0],[5.28,46,0.1],[5.24,-8.2,0.1],[7.65,5.2,0.4],[5.92,7.4,0.5],
+    [1.63,-57.2,0.5],[14.06,-60.4,0.6],[19.85,8.9,0.8],[12.44,-63.1,0.8],[4.6,16.5,0.9],[16.49,-26.4,1],[13.42,-11.2,1],[7.76,28,1.1],
+    [22.96,-29.6,1.2],[20.69,45.3,1.3],[12.8,-59.7,1.3],[10.14,12,1.4],[6.98,-29,1.5],[7.58,31.9,1.6],[17.56,-37.1,1.6],[12.52,-57.1,1.6],
+    [5.42,6.3,1.6],[5.44,28.6,1.7],[9.22,-69.7,1.7],[5.6,-1.2,1.7],[22.14,-47,1.7],[5.68,-1.9,1.8],[12.9,56,1.8],[11.06,61.8,1.8],
+    [3.41,49.9,1.8],[7.14,-26.4,1.8],[17.62,-43,1.9],[18.4,-34.4,1.9],[8.38,-59.5,1.9],[13.79,49.3,1.9],[6,44.9,1.9],[16.81,-69,1.9],
+    [6.63,16.4,1.9],[20.43,-56.7,1.9],[8.75,-54.7,2],[6.38,-18,2],[9.46,-8.7,2],[2.53,89.3,2],[2.12,23.5,2],[10.33,19.8,2.1],
+    [0.73,-18,2],[13.4,54.9,2.2],[18.92,-26.3,2],[14.11,-36.4,2.1],[0.14,29.1,2.1],[5.8,-9.7,2.1],[1.16,35.6,2.1],[14.85,74.2,2.1],
+    [17.58,12.6,2.1],[3.14,41,2.1],[2.07,42.3,2.2],[11.82,14.6,2.1],[22.71,-46.9,2.1],[12.69,-49,2.2],[9.28,-59.3,2.2],[9.13,-43.4,2.2],
+    [15.58,26.7,2.2],[5.53,-0.3,2.2],[20.37,40.3,2.2],[17.94,51.5,2.2],[0.68,56.5,2.2],[8.06,-40,2.2],[11.03,56.4,2.4],[12.26,57,2.4],[11.9,53.7,2.4]
+  ];
+  var stars = BRIGHT.map(function (s) { return [s[0] * 15, s[1], s[2]]; });
+
+  // faint flecks: the app's generator and seed. The app makes 720 for a phone; a bigger window takes more from the same sequence.
+  var seed = 1234567;
+  function rnd() { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }
+  for (var i = 0; i < 9000; i++) stars.push([rnd() * 360, Math.asin(rnd() * 2 - 1) / D2R, 3 + rnd() * 2.2]);
+
+  // Greenwich sidereal time now, in degrees
+  var d = Date.now() / 86400000 - 10957.5;
+  var gmst = 280.46061837 + 360.98564736629 * d; gmst -= Math.floor(gmst / 360) * 360;
+
+  var TILT = 0.6;               // viewer's latitude, radians
+  var TURN = 0.02;              // degrees the sky turns per pixel scrolled
+  var SIZE = [2.4, 1.7, 1.2];   // square sizes in px: bright, medium, faint
+  var ALPHA = [1, 0.75, 0.45];
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var w, h, queued = false;
+
+  function draw() {
+    queued = false;
+    var rot = still ? 0 : (window.pageYOffset || 0) * TURN;
+    var S = Math.sqrt(w * w + h * h) / 2 * 1.03;                 // the sky reaches every corner
+    var count = Math.min(stars.length, 73 + Math.round(720 * Math.max(1, S * S / 150000)));
+    var c0 = Math.cos(TILT), s0 = Math.sin(TILT);
+    ctx.clearRect(0, 0, w, h);
+    for (var tier = 0; tier < 3; tier++) {
+      ctx.fillStyle = 'rgba(255,255,255,' + ALPHA[tier] + ')';
+      var size = SIZE[tier];
+      for (var i = 0; i < count; i++) {
+        var s = stars[i], t = s[2] < 1.2 ? 0 : s[2] < 2.6 ? 1 : 2;
+        if (t !== tier) continue;
+        var a = (s[0] - gmst - rot) * D2R, cl = Math.cos(s[1] * D2R), sl = Math.sin(s[1] * D2R), ca = Math.cos(a);
+        if (s0 * sl + c0 * cl * ca < 0.04) continue;             // below the horizon
+        var x = w / 2 + cl * Math.sin(a) * S, y = h / 2 - (c0 * sl - s0 * cl * ca) * S;
+        if (x < -2 || y < -2 || x > w + 2 || y > h + 2) continue;
+        ctx.fillRect(x - size / 2, y - size / 2, size, size);
+      }
+    }
+  }
+  function resize() {
+    var r = window.devicePixelRatio || 1;
+    w = window.innerWidth; h = window.innerHeight;
+    canvas.width = Math.round(w * r); canvas.height = Math.round(h * r);
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    draw();
+  }
+  function queue() { if (!queued) { queued = true; requestAnimationFrame(draw); } }
+  window.addEventListener('resize', resize);
+  if (!still) window.addEventListener('scroll', queue, { passive: true });
+  resize();
+})();
+</script>
 </body>
 </html>

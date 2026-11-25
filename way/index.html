@@ -13,6 +13,16 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   html, body { background: var(--paper); color: var(--ink); }
+  /* the wheels, top to bottom of the page. "opacity" is how faded they are; "background-size" is how big. */
+  body { position: relative; isolation: isolate; }
+  body::before {
+    content: "";
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+    z-index: -1;
+    background: url(/way/pattern.svg) center top / clamp(130px, 14vw, 210px) auto;
+    opacity: 0.05;
+    pointer-events: none;
+  }
   body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -21,8 +31,7 @@
     flex-direction: column;
   }
   main {
-    width: 100%;
-    max-width: 1280px;            /* fills the screen; a soft cap on very wide monitors */
+    width: 100%;                  /* always the full width of the window, whatever its size */
     padding: 72px 48px 96px;      /* same gutter as the home page */
     flex: 1;
   }
@@ -52,8 +61,10 @@
     color: var(--dim);
     margin-bottom: 20px;
   }
-  p { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 24px; }
-  p.lead { font-size: clamp(21px, 1.2vw + 12px, 34px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 52px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p.version { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 900; font-size: clamp(64px, 9vw, 150px); line-height: 0.9; letter-spacing: -0.04em; margin: 8px 0 20px; }
+  p.version span { color: var(--pop); }
   p.tagline { font-size: clamp(28px, 2.4vw + 14px, 56px); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 32px; }
 
   /* sections: Support, Privacy Policy, Terms of Use */
@@ -79,7 +90,7 @@
     border-top: 1px solid var(--line);
   }
   ul { margin: 0 0 24px 1.2em; }
-  li { font-size: clamp(16px, 0.55vw + 10px, 21px); line-height: 1.55; margin-bottom: 10px; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 10px; }
   li::marker { color: var(--pop); }
   ol { margin: 0 0 24px 1.7em; }
   ol li { padding-left: 6px; margin-bottom: 18px; }
@@ -87,10 +98,10 @@
   a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(13,13,13,0.4); }
   a:hover { text-decoration-color: var(--pop); }
 
-  /* ---- analog design wordmark, bottom left, on every page ------------ */
+  /* ---- analog design studio logo, bottom left, on every page ------------ */
   footer { width: 100%; padding: 0 48px 48px; }
   .wordmark { display: inline-block; }
-  .wordmark img { display: block; height: clamp(32px, 4.2vw, 56px); width: auto; }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
   @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
 </style>
 </head>
@@ -104,6 +115,8 @@
   </header>
 
   <p class="eyebrow">Way for iPhone · iOS 17 and later</p>
+
+  <p class="version" aria-label="Version 1.1"><span>V</span>1.1</p>
 
   <p class="tagline">Color your way.</p>
 
@@ -160,7 +173,7 @@
   <!-- ================================================================ -->
   <section id="privacy">
     <h1>Privacy policy</h1>
-    <p class="eyebrow">Effective 19 November 2026. Replaces the version of 11 November 2026.</p>
+    <p class="eyebrow">Effective 24 November 2026. Replaces the version of 11 November 2026.</p>
 
     <ul>
       <li>Way has no accounts, no servers, no analytics and no ads. The app makes no network connections.</li>
@@ -173,14 +186,23 @@
       <li>If you email us, we use your email only to reply.</li>
       <li>If a change affects your privacy, we'll post it here with a new effective date before it ships.</li>
     </ul>
+
+    <h2>If you live outside the United States</h2>
+    <ul>
+      <li><strong>Who is responsible.</strong> analog design, in Oregon, USA, is responsible for the only personal information we handle, which is any email you send us. Everything WAY stores stays on your iPhone, under your control.</li>
+      <li><strong>Why we handle it.</strong> We use your email only to answer you. It is held in the United States by our email provider.</li>
+      <li><strong>Your rights.</strong> Depending on where you live, you may have the right to ask for a copy of the personal information we hold about you, to have it corrected or deleted, and to complain to your local data protection authority. Email <a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a> and we will act on it.</li>
+      <li><strong>What we don't do.</strong> We don't sell personal information, share it for advertising, track you or make automated decisions about you.</li>
+      <li><strong>Age.</strong> If your law sets a minimum age for agreeing to how personal data is handled, a parent or guardian must agree for anyone younger.</li>
+    </ul>
   </section>
 
   <!-- ================================================================ -->
   <section id="terms">
     <h1>Terms of use</h1>
-    <p class="eyebrow">Effective 19 November 2026. Replaces the version of 11 November 2026.</p>
+    <p class="eyebrow">Effective 24 November 2026. Replaces the version of 11 November 2026.</p>
 
-    <p>These terms are an agreement between you and Blake Ziolkowski, an individual in Oregon doing business as analog design ("analog design", "we", "us"). By downloading or using WAY, you agree to them. If you don't agree, don't use WAY. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
+    <p>These terms are an agreement between you and analog design, a business based in Oregon, USA ("analog design", "we", "us"). By downloading or using WAY, you agree to them. If you don't agree, don't use WAY. <strong>Section 12 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></p>
 
     <ol>
       <li><strong>License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use WAY on Apple devices you own or control, as the App Store's usage rules allow.</li>
@@ -202,11 +224,23 @@
       <li><strong>General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. These terms and the EULA are the whole agreement about WAY.</li>
     </ol>
 
+    <p><strong>International users: your local rights.</strong> This section applies if you live outside the United States. It is part of these terms, and where it conflicts with another section, this section wins.</p>
+    <ul>
+      <li><strong>Your local rights stay.</strong> Nothing in these terms takes away a right that the law of the country where you live gives you as a consumer and doesn't allow a contract to remove. If part of these terms isn't allowed where you live, that part doesn't apply to you, and the rest still does.</li>
+      <li><strong>Limits on our liability.</strong> We don't exclude or limit our liability where your law doesn't allow it. Depending on where you live, that can include liability for death or personal injury caused by negligence, for fraud, and for intentional or grossly negligent acts. Every other exclusion and limit in these terms applies as far as your law allows.</li>
+      <li><strong>Guarantees that can't be excluded.</strong> Some countries, including those of the European Union, the United Kingdom and Australia, give consumers guarantees about digital products that can't be excluded. The "as is" wording in these terms doesn't remove them. Where your law lets us limit what we owe under such a guarantee, we limit it to supplying WAY again or refunding what you paid for it.</li>
+      <li><strong>Disputes.</strong> If your law doesn't allow the arbitration agreement, the class-action waiver, the one-year time limit or the choice of Oregon courts to bind you, they don't bind you, and you may bring a claim in the courts of the country where you live. Oregon law governs these terms, and you also keep the protection of the mandatory law of the country where you live.</li>
+      <li><strong>Purchases and refunds.</strong> Apple provides WAY to you through the App Store and handles any payment. Any right your law gives you to cancel a purchase or get a refund is exercised through Apple.</li>
+      <li><strong>Language.</strong> These terms and WAY's screens are in English. If we ever provide a translation, the English version governs as far as your law allows.</li>
+      <li><strong>Local law.</strong> WAY is operated from Oregon, USA. We make no promise that it is appropriate or lawful to use where you are, and you are responsible for following the law there, including any law on photography.</li>
+      <li><strong>Availability.</strong> We choose which countries WAY is offered in and may withdraw it from any country at any time.</li>
+    </ul>
+
     <p><strong>Links:</strong> <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Apple's standard EULA</a> · <a href="https://reportaproblem.apple.com">Refunds</a> · <a href="mailto:helloanalogdesign@gmail.com?subject=Way">helloanalogdesign@gmail.com</a></p>
   </section>
 </main>
 <footer>
-  <a class="wordmark" href="/" aria-label="analog design, home"><img src="/logo.svg" alt="analog design"></a>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
 </footer>
 </body>
 </html>

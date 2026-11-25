@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summed. — a photo of text, summed up</title>
+<meta name="description" content="Summed turns a photo of text into a short English summary, on your iPhone. No account. Support, privacy policy and terms of use.">
+<link rel="icon" href="/Summed/icon.png" type="image/png">
+<style>
+  /* Summed's own colours, from the app: white, black, and the burnt orange of the period in the icon. */
+  :root { --bg: #FFFFFF; --ink: #000000; --dim: #5E5E5E; --line: #D9D9D9; --accent: #CC5500; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  main {
+    width: 100%;                  /* always the full width of the window, whatever its size */
+    padding: 72px 48px 96px;      /* same gutter as the home page */
+    flex: 1;
+  }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px 24px; flex-wrap: wrap; margin-bottom: 64px; }
+  .mark { display: block; }
+  .mark img { display: block; width: clamp(96px, 10vw, 144px); height: auto; }
+  .store {
+    display: inline-block;
+    padding: 13px 20px;
+    border-radius: 8px;
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .store:hover { opacity: 0.85; }
+
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--dim);
+    margin-bottom: 20px;
+  }
+  p { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 24px; }
+  p.lead { font-size: clamp(21px, 1.2vw + 12px, 52px); line-height: 1.4; font-weight: 300; margin-bottom: 40px; }
+  p.lead strong { font-weight: 700; }
+
+  /* sections: Support, Privacy policy, Terms of use */
+  section { padding-top: 96px; }
+  section > .eyebrow { margin-bottom: 40px; }
+  section > h1 + h2 { margin-top: 32px; }
+  h1 { font-weight: 700; font-size: clamp(28px, 1.6vw + 16px, 44px); line-height: 1; letter-spacing: -0.035em; margin-bottom: 12px; }
+  h2 {
+    font-size: clamp(18px, 0.6vw + 12px, 24px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 48px 0 14px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+  }
+  ul, ol { margin: 0 0 24px 1.2em; }
+  li { font-size: clamp(16px, 0.55vw + 10px, 30px); line-height: 1.55; margin-bottom: 10px; }
+  li::marker { color: var(--accent); }
+  li > ul { margin-top: 10px; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.9em; }
+  a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--dim); }
+  a:hover { text-decoration-color: var(--ink); }
+
+  /* ---- analog design studio logo, bottom left, on every page --------- */
+  footer { width: 100%; padding: 0 48px 48px; }
+  .wordmark { display: inline-block; }
+  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
+  @media (max-width: 640px) { main { padding: 48px 24px 64px; } footer { padding: 0 24px 32px; } }
+
+  /* Summed's type, as in the app: a serif for titles and a typewriter face for everything under them.
+     The serif is Cardo (the app uses Apple's New York, which can't be used on the web). */
+  @font-face { font-family: "Cardo"; src: url(/Summed/fonts/Cardo-Regular.woff) format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Cardo"; src: url(/Summed/fonts/Cardo-Bold.woff) format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+  :root { --serif: "Cardo", Georgia, "Times New Roman", serif; --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; }
+  body { font-family: var(--mono); }
+  p, li { font-size: clamp(13.5px, 0.25vw + 11.5px, 21px); line-height: 1.75; }
+  p.lead { font-family: var(--serif); font-weight: 400; font-size: clamp(24px, 1.5vw + 14px, 60px); line-height: 1.3; }
+  h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(38px, 2.6vw + 18px, 64px); letter-spacing: -0.01em; }
+  h2 { font-family: var(--serif); font-weight: 700; font-size: clamp(19px, 0.6vw + 13px, 25px); letter-spacing: 0; }
+  .eyebrow { font-weight: 400; letter-spacing: 0.1em; }
+  .store { border-radius: 3px; font-family: var(--mono); font-size: 13px; padding: 14px 16px; }
+</style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <a class="mark" href="/Summed/" aria-label="Summed.">
+      <img src="/Summed/icon.png" alt="Summed.">
+    </a>
+  </header>
+
+  <p class="eyebrow">Summed for iPhone · iOS 26 and later</p>
+
+  <p class="lead"><strong>Summed</strong> turns a photo of text into a short English summary. Point the camera at a sign, a menu, a page or a piece of mail, tap the white dot, and get a title, a summary of one to three sentences and a category. Save the ones you want to a library you can browse as a list, on a map or on a calendar. The reading and summarizing happen on your iPhone. No account.</p>
+  <p><strong>A summary is a shortcut, not a substitute.</strong> It is written by a machine, and it can leave things out, misread them, mistranslate them or get them wrong. For anything that matters, read the original.</p>
+  <p><strong>Requirements:</strong> iPhone with iOS 26 or later. Summaries need Apple Intelligence turned on, which means iPhone 15 Pro or later. Without it, Summed shows the text as it was read. The price is shown on Summed's App Store page.</p>
+
+  <!-- ================================================================ -->
+  <section id="support">
+    <h1>Support</h1>
+
+    <h2>Read this first</h2>
+    <ul>
+      <li>A summary is written by a machine. It can leave out the part that matters, misread a word or a number, or state something the text never said.</li>
+      <li>Never rely on a summary for medicine or dosage labels, allergens or ingredients, safety warnings and instructions, legal or official mail, contracts, forms, bills, deadlines or amounts of money. Read the original, and ask a qualified person when it matters.</li>
+      <li>A summary of text in another language is a machine translation. It is not a certified or checked translation.</li>
+      <li>Summed reads only the start of long text. Anything past roughly two dense pages may not be in the summary at all. A note under the summary tells you when this has happened.</li>
+      <li>Summed doesn't keep the original text or the full photo. Keep the original of anything you need.</li>
+      <li>Don't use Summed while driving, or anywhere your attention is needed.</li>
+    </ul>
+
+    <h2>Taking a summary</h2>
+    <ul>
+      <li>The first time you open Summed, a "Before you begin" screen asks you to accept the terms and privacy policy. The camera and location requests come after that. From then on Summed opens on the camera. Point it at the text and tap the white dot.</li>
+      <li>You'll see "Analyzing. Hold please." while your iPhone reads the text and writes the summary.</li>
+      <li>The summary page shows a title, the summary and a suggested category. Notes directly under the summary say that it is machine-made, whether it is a machine translation and from which language, and whether it covers only the first part of a long text.</li>
+      <li>Tap the plus at the top right to add it to your library. Nothing is saved until you do. The plus turns into a check mark once it's saved.</li>
+      <li>Tap the lens at the top left to go back to the camera. A summary you didn't add is discarded.</li>
+    </ul>
+
+    <h2>Getting a good read</h2>
+    <ul>
+      <li>Hold the phone steady, fill the frame with the text, and keep the page flat and evenly lit.</li>
+      <li>Take one page or one sign at a time. For a long document, take it in sections.</li>
+      <li>"No text found. Try moving closer." means the camera couldn't make out any text.</li>
+      <li>Handwriting, tiny print, glare, curved pages, columns and tables are the most likely to be misread.</li>
+    </ul>
+
+    <h2>Summaries and Apple Intelligence</h2>
+    <ul>
+      <li>Summaries are written by Apple's on-device model, so Apple Intelligence must be turned on in Settings. It needs iPhone 15 Pro or later.</li>
+      <li>When Apple Intelligence isn't available, Summed shows the first part of the text as it was read, about 280 characters, with a line saying it isn't a summary.</li>
+      <li>Summaries are always in English.</li>
+      <li>Summed reads about the first 6,000 characters of text in Latin letters, and about 1,800 in other scripts such as Chinese, Japanese, Arabic or Cyrillic. If Apple's model can't take that much, Summed tries again with half, and then a quarter.</li>
+      <li>The same photo can give a different summary on another day or after an iOS update.</li>
+    </ul>
+
+    <h2>Categories</h2>
+    <ul>
+      <li>Summed suggests one category: books, magazines, posters, signs, menus, manuals, mail, labels, receipts, forms, notes or other. Tap another to change it.</li>
+      <li>Tap the plus at the end of the row to add your own category, up to 24 characters.</li>
+    </ul>
+
+    <h2>Library</h2>
+    <ul>
+      <li>Tap the book at the bottom right to open the library. Switch between List, Map and Cal at the top.</li>
+      <li>Filter by category, by language and, when location is on, by city.</li>
+      <li>Tap a snippet to open it. Tap its title to edit it. Tap the photo to see all of it, and tap again to crop it back.</li>
+      <li>To rename from the list, swipe right and tap Rename, or press and hold.</li>
+      <li>To share, swipe right and tap Share, or open the snippet and tap the paper airplane. A share sends the title, the summary and its notes as text. It doesn't send the photo or the place.</li>
+      <li>To delete, swipe left and confirm. An Undo bar shows for six seconds. After that, or once you close the library or leave Summed, the snippet is gone for good.</li>
+      <li>The summary text itself can't be edited in this version.</li>
+    </ul>
+
+    <h2>Map and places</h2>
+    <ul>
+      <li>With location on, Summed saves where each snippet was captured, shows its city in the list and pins it on the map.</li>
+      <li>Place names need an internet connection at the moment you save. A snippet saved offline keeps its pin but gets no place name.</li>
+      <li>If you decline location, snippets are saved without a place, and the map shows a message with a link to Settings.</li>
+      <li>If you turn location off later, places and the map are hidden. The places already saved stay with their snippets until you delete those snippets.</li>
+    </ul>
+
+    <h2>Calendar</h2>
+    <ul>
+      <li>The calendar starts with the month you first used Summed. Each dot is a snippet. Tap a day to list its snippets under that week.</li>
+    </ul>
+
+    <h2>What is saved</h2>
+    <ul>
+      <li>For each snippet you add: the title, summary, category, language, date and time, the place if location is on, and a smaller black-and-white copy of the photo.</li>
+      <li>Not saved: the full-color photo, the full text that was read, and anything you didn't add to the library.</li>
+      <li>Summed doesn't add anything to your Photos library.</li>
+    </ul>
+
+    <h2>Your data</h2>
+    <ul>
+      <li>Everything is stored only on your iPhone and is included in its iCloud or computer backup. There is no account, no sync between devices, no search and no export in this version.</li>
+      <li>If you delete Summed, everything in it is deleted too. We have no copy and can't recover it.</li>
+    </ul>
+
+    <h2>Troubleshooting</h2>
+    <ul>
+      <li><strong>"Summed needs the camera to read text."</strong> Tap Open Settings and turn on Camera for Summed.</li>
+      <li><strong>I get the text as read, not a summary.</strong> Apple Intelligence is off, still downloading, or not available on your iPhone. Turn it on in Settings and try again later.</li>
+      <li><strong>The summary is wrong or misses something.</strong> Move closer and take the text in smaller sections. Then read the original. No retake makes a summary safe to rely on.</li>
+      <li><strong>"Language not detected".</strong> There was too little text, or it mixed languages. The summary may still be right. The note under the summary then says it is a machine translation if the original wasn't in English.</li>
+      <li><strong>The map is blank or a place name is missing.</strong> Maps and place names need an internet connection.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <ul>
+      <li>Email <a href="mailto:helloanalogdesign@gmail.com?subject=Summed">helloanalogdesign@gmail.com</a> with "Summed" in the subject. Include your iPhone model and iOS version. If a summary went wrong, tell us what kind of text it was. Don't send us anything private.</li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="privacy">
+    <h1>Privacy policy</h1>
+    <p class="eyebrow">Effective 24 November 2026.</p>
+
+    <p>Summed is made by analog design ("we", "us"). This policy covers the Summed app for iPhone and this page.</p>
+    <p><strong>The short version:</strong> your photos are read and summarized on your iPhone, and your library lives only on your iPhone. We have no account system and no server, so we never receive your photos, text, summaries or locations. If you turn location on, two Apple services receive location details, and they are described below.</p>
+
+    <h2>What Summed stores on your iPhone</h2>
+    <ul>
+      <li><strong>Snippets you add to the library:</strong> the title, the summary, the category, the language, the date and time, and a smaller black-and-white copy of the photo.</li>
+      <li><strong>Place, if location is on:</strong> the coordinates where the snippet was captured, and a place name such as a city and country.</li>
+      <li><strong>Your own categories,</strong> the date you first used Summed, which sets where the calendar starts, and the version and time of the terms you accepted.</li>
+    </ul>
+
+    <h2>What Summed doesn't keep</h2>
+    <ul>
+      <li>The full-color, full-size photo.</li>
+      <li>The full text that was read from the photo.</li>
+      <li>Any capture you didn't add to the library. It is discarded when you go back to the camera.</li>
+    </ul>
+
+    <h2>What we collect</h2>
+    <ul>
+      <li>Nothing. Summed has no accounts, no servers of ours, no analytics, no ads and no third-party code. We can't see anything in your library.</li>
+    </ul>
+
+    <h2>Camera</h2>
+    <ul>
+      <li>Summed uses the camera only while the app is open, to show the viewfinder and take the photo when you tap the white dot.</li>
+      <li>Photos aren't saved to your Photos library and aren't sent anywhere.</li>
+      <li>Summed doesn't recognize faces or identify people.</li>
+    </ul>
+
+    <h2>Reading and summarizing</h2>
+    <ul>
+      <li>The text in a photo is read by Apple's text recognition on your iPhone.</li>
+      <li>The summary, title and category are written by Apple's on-device language model, Apple Intelligence. The text is given to that model on your iPhone. We never receive it.</li>
+    </ul>
+
+    <h2>Location</h2>
+    <ul>
+      <li>Location is optional. Summed asks for it after you accept the terms on first launch. If you decline, everything else still works.</li>
+      <li>When location is on, Summed reads your iPhone's location while the app is open, to within about ten metres.</li>
+      <li>When you add a snippet to the library, the location at the moment of capture is stored with it on your iPhone.</li>
+      <li>To turn that location into a place name, your iPhone sends the coordinates to Apple's geocoding service. Apple handles this under its own privacy policy.</li>
+      <li>The Map view is Apple Maps. To draw it, your iPhone asks Apple for the map of the area on screen, along with ordinary network details such as your IP address.</li>
+      <li>If you turn location off later, Summed stops reading it and hides places and the map. Locations already saved stay with their snippets until you delete those snippets.</li>
+    </ul>
+
+    <h2>What your photos may contain</h2>
+    <ul>
+      <li>Mail, receipts, forms, labels and notes often show names, addresses, account numbers, health details or other private information, sometimes about other people. Summed keeps a readable black-and-white copy of each photo you add.</li>
+      <li>Anyone who can unlock your iPhone can open Summed, because the app has no lock of its own. Use a passcode, and don't add a photo you wouldn't want kept.</li>
+      <li>You are responsible for having the right to photograph and keep what you capture.</li>
+    </ul>
+
+    <h2>Sharing</h2>
+    <ul>
+      <li>Nothing is shared unless you do it. A share sends the title, the summary and its notes as text through Apple's share sheet. It doesn't include the photo or the place.</li>
+      <li>Once you send something, it is outside Summed. Where you send it has its own privacy rules.</li>
+    </ul>
+
+    <h2>Backups</h2>
+    <ul>
+      <li>Your Summed data is included in your iPhone's iCloud or computer backup, under your Apple Account and Apple's privacy policy. We can't see or reach it.</li>
+    </ul>
+
+    <h2>Deleting your data</h2>
+    <ul>
+      <li>Delete any snippet by swiping it left in the list and confirming, or delete Summed to remove everything. Data may stay in earlier backups until those backups are replaced.</li>
+    </ul>
+
+    <h2>Requests from others</h2>
+    <ul>
+      <li>We hold none of your library, so we have nothing to give anyone who asks us for it, including agencies and courts. Your iPhone and its backups are yours to protect.</li>
+    </ul>
+
+    <h2>Apple</h2>
+    <ul>
+      <li>If you've chosen to share data with developers, Apple may give us anonymous totals of downloads, sessions and crashes. We can't link these to you.</li>
+    </ul>
+
+    <h2>Email</h2>
+    <ul>
+      <li>If you email us, we use your email and what you send only to reply, and we delete it when it's no longer needed. Please don't send us photos or text containing private information. Email to us is handled in the United States.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <ul>
+      <li>Summed isn't directed at children under 13, and we don't knowingly collect information from anyone, including children.</li>
+    </ul>
+
+    <h2>If you live outside the United States</h2>
+    <ul>
+      <li><strong>Who is responsible.</strong> analog design, in Oregon, USA, is responsible for the only personal information we handle, which is any email you send us. Everything Summed stores stays on your iPhone, under your control.</li>
+      <li><strong>Why we handle it.</strong> We use your email only to answer you. It is held in the United States by our email provider.</li>
+      <li><strong>Apple's services.</strong> The place-name and map requests Summed makes to Apple are handled by Apple under its own privacy policy, wherever you are.</li>
+      <li><strong>Your rights.</strong> Depending on where you live, you may have the right to ask for a copy of the personal information we hold about you, to have it corrected or deleted, and to complain to your local data protection authority. Email <a href="mailto:helloanalogdesign@gmail.com?subject=Summed">helloanalogdesign@gmail.com</a> and we will act on it.</li>
+      <li><strong>What we don't do.</strong> We don't sell personal information, share it for advertising, track you or make automated decisions about you.</li>
+      <li><strong>Age.</strong> If your law sets a minimum age for agreeing to how personal data is handled, a parent or guardian must agree for anyone younger.</li>
+    </ul>
+
+    <h2>Changes</h2>
+    <ul>
+      <li>If a change affects your privacy, we'll post it here with a new effective date before it ships.</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <ul>
+      <li><a href="mailto:helloanalogdesign@gmail.com?subject=Summed">helloanalogdesign@gmail.com</a></li>
+    </ul>
+  </section>
+
+  <!-- ================================================================ -->
+  <section id="terms">
+    <h1>Terms of use</h1>
+    <p class="eyebrow">Effective 24 November 2026.</p>
+
+    <p>These terms are an agreement between you and analog design, a business based in Oregon, USA ("analog design", "we", "us"). By tapping Accept when Summed first opens, or by downloading or using Summed, you agree to them. If you don't agree, don't use Summed.</p>
+    <p><strong>Three things to know before anything else:</strong></p>
+    <ul>
+      <li>Summaries are written by a machine and can be wrong, incomplete or mistranslated. Summed gives no medical, legal, financial, safety or other professional advice (sections 2 to 8).</li>
+      <li>You are responsible for what you photograph, what you rely on and what you share (sections 10 to 14).</li>
+      <li><strong>Section 25 requires disputes to be settled by individual arbitration, not in court or in a class action.</strong></li>
+    </ul>
+    <p><strong>1. License.</strong> Apple's <a href="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/">Licensed Application End User License Agreement</a> (the "EULA") applies, together with these terms. If the two conflict, the EULA governs to the extent of the conflict. We grant you a personal, non-transferable, non-exclusive, revocable license to use Summed on Apple devices you own or control, as the App Store's usage rules allow.</p>
+    <p><strong>2. What Summed is, and what it isn't.</strong> Summed is a convenience tool. It gives you a quick, rough idea of what a piece of text says, and lets you keep that note. Summed is not, and must never be used as:</p>
+    <ul>
+      <li>a replacement for reading the original text;</li>
+      <li>a translation service, or a certified, sworn or checked translation;</li>
+      <li>medical, pharmaceutical, nutritional, legal, tax, financial, immigration, engineering or safety advice;</li>
+      <li>a way to understand dosage, allergen, hazard, warning or emergency information;</li>
+      <li>a scanner, an archive, or a copy of a document for any official, legal, tax or business purpose;</li>
+      <li>an assistive reading tool for someone who can't otherwise read the text;</li>
+      <li>a navigation, tracking or emergency tool.</li>
+    </ul>
+    <p>Nothing in Summed or on this site is professional advice of any kind.</p>
+    <p><strong>3. Summaries can be wrong.</strong> Every title, summary and category is generated automatically by a language model. Generated text can:</p>
+    <ul>
+      <li>leave out the most important part, including warnings, conditions, exceptions, deadlines and fine print;</li>
+      <li>get numbers, amounts, units, doses, dates, times, names and addresses wrong;</li>
+      <li>reverse the meaning, for example by dropping a "not", "do not" or "unless";</li>
+      <li>state things the text never said;</li>
+      <li>change the tone, the certainty or the urgency of the original;</li>
+      <li>differ from one attempt to the next for the same photo.</li>
+    </ul>
+    <p>A summary is one to three sentences. It is short by design, so it always leaves things out. A confident, well-written summary is no more likely to be right than a clumsy one. The short notes Summed shows under a summary are reminders only, and a summary with fewer notes is no more reliable than one with more.</p>
+    <p><strong>4. Reading text from a photo.</strong> Before anything is summarized, the text is read from your photo by automatic text recognition. That step can fail too.</p>
+    <ul>
+      <li>Handwriting, small or stylized print, glare, shadow, blur, curved or folded pages, columns, tables, stamps and damaged text are often misread or skipped.</li>
+      <li>Text can be read in the wrong order, and text at the edge of the photo can be missed.</li>
+      <li>Summed never shows you the text it read, so you can't see what was misread.</li>
+      <li><strong>Long text is cut.</strong> Summed gives the model only the start of the text: about 6,000 characters in Latin letters, about 1,800 in other scripts, and sometimes half or a quarter of that. The rest plays no part in the summary. Summed adds a note when this happens, but it can't tell you what was left out.</li>
+      <li>When Apple Intelligence isn't available, Summed shows about the first 280 characters of the text as read. That isn't a summary, and it isn't the whole text.</li>
+    </ul>
+    <p><strong>5. Other languages.</strong> Summed writes every summary in English, whatever language the text is in. Summed's screens, notes, warnings and these terms are in English only. If you can't read them well, have someone explain them to you before you rely on anything in Summed.</p>
+    <ul>
+      <li>A summary of text in another language is an unchecked machine translation, on top of being a summary. Both steps can go wrong.</li>
+      <li>Idioms, legal and medical terms, units, dates, currencies, names, politeness and negation are easily mistranslated.</li>
+      <li>The language named in a note, such as "Machine translation from French", is an automatic guess and can be wrong. When the language isn't detected, the note only says the summary may be a translation. When the text is wrongly detected as English, no translation note appears at all.</li>
+      <li>Never use a Summed summary where an accurate translation matters, including medical care, legal and immigration matters, contracts, official forms, travel documents and safety information. Use a qualified human translator.</li>
+    </ul>
+    <p><strong>6. What you must never rely on a summary for.</strong> Don't make any decision about health, safety, money or legal rights from a Summed summary. In particular, never rely on one for:</p>
+    <ul>
+      <li><strong>Medicine and health.</strong> Prescription and medicine labels, dosage, warnings, interactions, medical letters, test results and instructions from a clinician.</li>
+      <li><strong>Food.</strong> Ingredients, allergens, dietary and religious suitability, cooking and storage instructions, and use-by dates. A summary of a menu or a label can leave out the one ingredient that could harm you.</li>
+      <li><strong>Safety.</strong> Warning and hazard signs, chemical and product labels, operating and assembly manuals, electrical, gas and machinery instructions, and evacuation or emergency notices.</li>
+      <li><strong>Legal and official matters.</strong> Contracts, leases, terms, court and government papers, tickets, fines, notices, immigration and tax papers, and anything with a deadline or a signature.</li>
+      <li><strong>Money.</strong> Bills, invoices, receipts, prices, bank and insurance letters, interest, fees, totals and due dates.</li>
+      <li><strong>Travel.</strong> Road, transit and border signs, timetables, tickets and travel rules.</li>
+      <li><strong>Forms.</strong> What a form asks, what you are agreeing to, and what happens if you get it wrong.</li>
+    </ul>
+    <p>Read the original yourself. If you can't read it, or the outcome matters, ask a qualified person. We aren't responsible for anything you do, or don't do, because of a summary.</p>
+    <p><strong>7. Categories, titles, languages, dates and places.</strong> These labels are generated or recorded automatically and can be wrong.</p>
+    <ul>
+      <li>A category such as "receipts", "mail", "forms" or "manuals" is a sorting label. It doesn't mean Summed understood the document or kept a usable copy of it.</li>
+      <li>The date and time are when the photo was taken on your iPhone's clock, not any date in the text.</li>
+      <li>A place is your iPhone's reported location when you took the photo, not anything in the text. It can be approximate, wrong or missing.</li>
+    </ul>
+    <p><strong>8. Summed is not a record.</strong></p>
+    <ul>
+      <li>Summed keeps a short summary and a smaller black-and-white copy of the photo. It doesn't keep the text it read or the original photo.</li>
+      <li>The saved copy may be too small or too compressed to read every word. It isn't a scan and may not be accepted as a copy of a receipt, an invoice, a warranty, a contract, an ID, a medical record or any other document.</li>
+      <li>Don't throw away, return or destroy an original because it is in Summed. Keep the originals of anything you may need for tax, expenses, warranty, insurance, legal or medical reasons.</li>
+    </ul>
+    <p><strong>9. Your data is your responsibility.</strong></p>
+    <ul>
+      <li>Your library is stored only on your device. There is no account, no sync and no export. We have no copy and can't restore anything.</li>
+      <li>A summary you don't add to the library is discarded.</li>
+      <li>A deleted snippet can be brought back only while the Undo bar is showing, about six seconds. After that it is gone.</li>
+      <li>Data can also be lost by deleting the app, by losing, breaking or replacing your phone, by a failed update or restore, or by a fault in Summed or iOS.</li>
+      <li>You are responsible for keeping your iPhone backed up and locked. We aren't liable for any loss, corruption or exposure of data, however it happens.</li>
+    </ul>
+    <p><strong>10. What you photograph is your responsibility.</strong> Summed photographs whatever you point it at. Before you do, make sure you are allowed to.</p>
+    <ul>
+      <li><strong>Other people's rights in the text.</strong> Books, magazines, articles, posters, menus, manuals and most other printed material belong to someone. Use Summed on them for your own personal reference only. Don't use Summed to copy, republish or distribute someone else's work, and don't treat a summary as free of the original's rights.</li>
+      <li><strong>Private and confidential material.</strong> Don't capture mail, documents, screens or notes that aren't yours, or that you have a duty to keep confidential, without permission. That includes your employer's, your clients', your patients' and your school's material.</li>
+      <li><strong>Other people's personal information.</strong> Names, addresses, account numbers, health details and IDs that appear in a photo are stored in your library. You are responsible for handling them lawfully.</li>
+      <li><strong>Places that restrict photography.</strong> Museums, galleries, shops, theatres, courts, government buildings, workplaces, private property, exams and many other places limit or forbid photography. Follow their rules and the law.</li>
+      <li><strong>People.</strong> Don't photograph people without the permission the law requires.</li>
+    </ul>
+    <p><strong>11. Sensitive material in your library.</strong> Summed keeps a readable black-and-white copy of each photo you add, on your iPhone and in its backups, with no lock of its own. Think before adding medical, financial, identity, legal or work documents, or anything about another person. Anyone who can unlock your phone can read them.</p>
+    <p><strong>12. Location and the map.</strong></p>
+    <ul>
+      <li>Location is optional. With it on, Summed stores where each snippet was captured and shows it in the list and on a map.</li>
+      <li>Locations are approximate and can be wrong. Place names come from Apple and can be wrong or missing. Don't use Summed's map to navigate, to find your way back, or to tell anyone where you are.</li>
+      <li>Your saved places can show where you live, work and travel to anyone who sees your phone or its backups. Whether to turn location on is your choice and your responsibility.</li>
+    </ul>
+    <p><strong>13. Sharing.</strong></p>
+    <ul>
+      <li>A share sends the title, the summary and its notes as text. Read it before you send it, and don't remove the notes.</li>
+      <li>When you send a summary, you are the one saying it. Don't present it as a quotation, an accurate translation or a faithful account of the original. Tell the person a machine wrote it.</li>
+      <li>You are responsible for what you share and for what anyone does because of it, including any harm to someone whose words, document or information were summarized wrongly.</li>
+      <li>Once you share something, neither we nor Summed can take it back.</li>
+    </ul>
+    <p><strong>14. Use your phone safely.</strong> Don't use Summed while driving, cycling, operating a vehicle or machinery, or walking in traffic, or at any time your attention is needed elsewhere. Watch where you are standing and what is around you when you take a photo. Never use Summed to read a road sign while you are driving.</p>
+    <p><strong>15. Not an assistive tool.</strong> Summed isn't designed, tested or certified as a reading aid. If you depend on assistive technology to read, whether because of vision, a reading difficulty or language, don't depend on Summed alone for anything that affects your health, safety, money or rights.</p>
+    <p><strong>16. Apple Intelligence and Apple's services.</strong> Summed relies on software and services from Apple, including the camera, text recognition, Apple Intelligence, Apple Maps, Apple's geocoding service and the share sheet. Apple provides them under its own terms and privacy policy. We don't make or control them.</p>
+    <ul>
+      <li>Apple Intelligence is available only on some iPhones, in some languages and regions, and only when it is turned on and has finished downloading.</li>
+      <li>Apple's model may decline to summarize some text. When that happens, Summed shows the text as read.</li>
+      <li>Apple can change its models and services at any time, and your results can change with them.</li>
+      <li>These services can be wrong, be unavailable or stop, and we aren't responsible for them.</li>
+    </ul>
+    <p><strong>17. Acceptable use.</strong> You agree to use Summed only for lawful purposes. Don't use it to:</p>
+    <ul>
+      <li>infringe anyone's copyright or other rights;</li>
+      <li>read, record or disclose private or confidential information you have no right to;</li>
+      <li>cheat in an exam or break the rules of a school, employer or licensing body;</li>
+      <li>watch, track or gather information about another person;</li>
+      <li>make decisions for other people in a professional setting, such as clinical, legal, financial or safety work.</li>
+    </ul>
+    <p><strong>18. Who can use Summed.</strong> You must be at least 18, or the age of majority where you live, to agree to these terms. If you are younger, you may use Summed only if a parent or legal guardian has read and agreed to these terms for you and supervises your use. That adult accepts these terms, including sections 6 and 21 to 25, for you and for themselves.</p>
+    <p><strong>19. Our property.</strong> Summed and its design, code, name, logo and icons belong to analog design or its licensors and are protected by law. You may not copy, modify, distribute, sell, rent, reverse engineer, decompile or make derivative works of Summed or any part of it, except where the law expressly allows despite this restriction. We claim no ownership of your photos or of the summaries Summed generates for you. We make no promise that a generated summary is original, is free of other people's rights, or can be owned by you.</p>
+    <p><strong>20. Price.</strong> The price of Summed, if any, is the one shown on its App Store page when you get it. Apple handles all payments and refunds.</p>
+    <p><strong>21. Disclaimer of warranties.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, SUMMED AND THIS SITE ARE PROVIDED "AS IS" AND "AS AVAILABLE", WITH ALL FAULTS AND WITHOUT WARRANTY OF ANY KIND. WE DISCLAIM ALL WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, QUIET ENJOYMENT AND NON-INFRINGEMENT. WE DON'T WARRANT THAT ANY TEXT READ FROM A PHOTO, OR ANY SUMMARY, TITLE, TRANSLATION, CATEGORY, LANGUAGE LABEL, DATE, PLACE OR MAP, IS ACCURATE, COMPLETE, CURRENT, LAWFUL TO ACT ON OR SAFE TO RELY ON. WE DON'T WARRANT THAT GENERATED TEXT IS ORIGINAL OR FREE OF OTHER PEOPLE'S RIGHTS. WE DON'T WARRANT THAT SUMMED WILL BE UNINTERRUPTED, ERROR-FREE, SECURE OR COMPATIBLE WITH YOUR DEVICE, THAT YOUR DATA WILL BE PRESERVED OR KEPT PRIVATE, OR THAT DEFECTS WILL BE FIXED. NO ADVICE OR INFORMATION FROM US, IN THE APP, ON THIS SITE OR BY EMAIL, CREATES A WARRANTY.</p>
+    <p><strong>22. Limitation of liability.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, ANALOG DESIGN AND ITS OWNERS, MEMBERS, EMPLOYEES, CONTRACTORS AND AGENTS WILL NOT BE LIABLE FOR ANY OF THE FOLLOWING, ARISING FROM OR RELATED TO SUMMED, THIS SITE OR THESE TERMS, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, INCLUDING NEGLIGENCE, EVEN IF WE WERE TOLD THEY WERE POSSIBLE:</p>
+    <ul>
+      <li>PERSONAL INJURY, ILLNESS, ALLERGIC REACTION, POISONING, OVERDOSE, DISABILITY OR DEATH;</li>
+      <li>ANY LOSS FROM RELYING ON A SUMMARY, A TRANSLATION OR TEXT READ FROM A PHOTO, OR FROM NOT READING THE ORIGINAL;</li>
+      <li>MISSED DEADLINES, LOST RIGHTS OR BENEFITS, FINES, PENALTIES, LATE FEES, WRONG PAYMENTS AND FINANCIAL LOSS;</li>
+      <li>DAMAGE TO OR LOSS OF PROPERTY;</li>
+      <li>CLAIMS BY ANYONE WHOSE WORK, DOCUMENT, WORDS OR PERSONAL INFORMATION YOU PHOTOGRAPHED, KEPT OR SHARED, INCLUDING COPYRIGHT, PRIVACY, CONFIDENTIALITY AND DEFAMATION CLAIMS;</li>
+      <li>LOSS, CORRUPTION OR EXPOSURE OF DATA, INCLUDING SENSITIVE DOCUMENTS AND LOCATIONS IN YOUR LIBRARY;</li>
+      <li>LOST PROFITS, REVENUE, GOODWILL OR OPPORTUNITY;</li>
+      <li>ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY OR PUNITIVE DAMAGES.</li>
+    </ul>
+    <p>OUR TOTAL LIABILITY FOR ALL CLAIMS WILL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID FOR SUMMED IN THE 12 MONTHS BEFORE THE CLAIM, OR US$10. THESE LIMITS APPLY EVEN IF A REMEDY FAILS OF ITS ESSENTIAL PURPOSE. Some places don't allow certain exclusions or limits, so some of these may not apply to you. Where that is the case, our liability is limited to the smallest amount the law allows.</p>
+    <p><strong>23. Release.</strong> TO THE FULLEST EXTENT PERMITTED BY LAW, YOU RELEASE AND FOREVER DISCHARGE ANALOG DESIGN AND ITS OWNERS, MEMBERS, EMPLOYEES, CONTRACTORS AND AGENTS FROM EVERY CLAIM, DEMAND AND CAUSE OF ACTION, KNOWN OR UNKNOWN, ARISING FROM OR RELATED TO WHAT YOU PHOTOGRAPH, WHAT YOU DO OR DON'T DO BECAUSE OF A SUMMARY, WHAT YOU KEEP IN YOUR LIBRARY AND WHAT YOU SHARE, INCLUDING CLAIMS BASED ON OUR NEGLIGENCE. This release also binds your family, heirs, estate and anyone claiming through you. You waive California Civil Code section 1542 and any similar law that limits a general release of unknown claims. This release doesn't cover claims that the law doesn't allow you to release.</p>
+    <p><strong>24. Indemnity.</strong> To the extent the law allows, you agree to defend, indemnify and hold harmless analog design and its owners, members, employees, contractors and agents from any claim, loss, liability, damage, fine, cost or expense, including reasonable legal fees, arising from:</p>
+    <ul>
+      <li>your use or misuse of Summed;</li>
+      <li>anything you photograph, keep or share with it;</li>
+      <li>any claim that what you captured or shared infringes someone's copyright, privacy, confidentiality or other rights;</li>
+      <li>any claim by a person who relied on a summary you gave them;</li>
+      <li>any breach of law by you;</li>
+      <li>your breach of these terms.</li>
+    </ul>
+    <p><strong>25. Disputes and arbitration.</strong> Before filing any claim, email <a href="mailto:helloanalogdesign@gmail.com?subject=Summed">helloanalogdesign@gmail.com</a> describing it, and give us 60 days to try to resolve it. If we can't, you and we agree that any dispute arising from or related to Summed, this site or these terms will be resolved by <strong>binding individual arbitration</strong> administered by the American Arbitration Association under its Consumer Arbitration Rules, except that either side may bring an individual claim in small claims court. <strong>YOU AND WE WAIVE ANY RIGHT TO A JURY TRIAL AND TO TAKE PART IN A CLASS, COLLECTIVE OR REPRESENTATIVE ACTION.</strong> The arbitrator may award relief only to you individually. You may opt out of this section by emailing us within 30 days of first using Summed, with your name and a statement that you opt out. If this section doesn't apply, claims go only to the state or federal courts in Oregon, and you and we consent to their jurisdiction.</p>
+    <p><strong>26. Time limit.</strong> Any claim must be brought within one year after it arises, or it is permanently barred, to the extent the law allows.</p>
+    <p><strong>27. Governing law.</strong> These terms are governed by the laws of the State of Oregon, USA, and the Federal Arbitration Act, without regard to conflict-of-law rules. The UN Convention on Contracts for the International Sale of Goods doesn't apply.</p>
+    <p><strong>28. Apple.</strong> These terms are between you and analog design, not Apple. Apple has no obligation to provide maintenance or support for Summed. If Summed fails to meet any applicable warranty, you may notify Apple for a refund of the purchase price, if any, and Apple has no other warranty obligation. We, not Apple, are responsible for any product claims, consumer protection claims or intellectual property claims about Summed, to the extent these terms don't disclaim them. Apple and its subsidiaries are third-party beneficiaries of these terms and may enforce them against you. You confirm that you aren't in a country under a US government embargo and aren't on any US government list of prohibited or restricted parties.</p>
+    <p><strong>29. Use outside the United States.</strong> Summed is operated from Oregon, USA. We make no claim that Summed is appropriate or lawful to use in any particular place. You are responsible for the laws where you are, including laws on photography, copyright, privacy, personal data and machine-generated content.</p>
+    <p><strong>30. Changes and ending.</strong> We may update these terms. We'll post the new version here with a new effective date. Summed may ask you to accept the new version before you can continue. If you keep using Summed after that, you accept the update. We may change, stop offering or stop supporting Summed at any time. Your license ends automatically if you break these terms. Every section that by its nature should survive does, including sections 2 to 17 and 19 to 31.</p>
+    <p><strong>31. General.</strong> If any part of these terms is unenforceable, it will be enforced as far as possible, and the rest stays in effect. Not enforcing a term isn't a waiver. You may not transfer these terms. We may transfer them to a successor. "Including" means "including without limitation", and the lists and examples in these terms aren't complete. Headings are for convenience. These terms are written in English, and if they are ever translated, the English version governs. If these terms conflict with anything in the app or elsewhere on this page, these terms govern. These terms and the EULA are the whole agreement about Summed.</p>
+    <p><strong>International users: your local rights.</strong> This section applies if you live outside the United States. It is part of these terms, and where it conflicts with another section, this section wins.</p>
+    <ul>
+      <li><strong>Your local rights stay.</strong> Nothing in these terms takes away a right that the law of the country where you live gives you as a consumer and doesn't allow a contract to remove. If part of these terms isn't allowed where you live, that part doesn't apply to you, and the rest still does.</li>
+      <li><strong>Limits on our liability.</strong> We don't exclude or limit our liability where your law doesn't allow it. Depending on where you live, that can include liability for death or personal injury caused by negligence, for fraud, and for intentional or grossly negligent acts. Every other exclusion and limit in these terms, including the release, applies as far as your law allows.</li>
+      <li><strong>Guarantees that can't be excluded.</strong> Some countries, including those of the European Union, the United Kingdom and Australia, give consumers guarantees about digital products that can't be excluded. The "as is" wording in these terms doesn't remove them. Where your law lets us limit what we owe under such a guarantee, we limit it to supplying Summed again or refunding what you paid for it.</li>
+      <li><strong>Disputes.</strong> If your law doesn't allow the arbitration agreement, the class-action waiver, the one-year time limit or the choice of Oregon courts to bind you, they don't bind you, and you may bring a claim in the courts of the country where you live. Oregon law governs these terms, and you also keep the protection of the mandatory law of the country where you live.</li>
+      <li><strong>Purchases and refunds.</strong> Apple provides Summed to you through the App Store and handles any payment. Any right your law gives you to cancel a purchase or get a refund is exercised through Apple.</li>
+      <li><strong>Language.</strong> These terms, Summed's screens and every note and summary it shows are in English. If we ever provide a translation of these terms, the English version governs as far as your law allows.</li>
+      <li><strong>Local law.</strong> Section 29 applies wherever you are. Laws on photography, copyright, privacy and machine-generated content differ in every country, and following them is your responsibility.</li>
+      <li><strong>Availability.</strong> We choose which countries Summed is offered in and may withdraw it from any country at any time.</li>
+    </ul>
+    <p><strong>Contact:</strong> <a href="mailto:helloanalogdesign@gmail.com?subject=Summed">helloanalogdesign@gmail.com</a></p>
+  </section>
+</main>
+<footer>
+  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
+</footer>
+</body>
+</html>
