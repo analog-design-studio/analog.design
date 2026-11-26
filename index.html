@@ -4,35 +4,28 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>analog design studio</title>
-<meta name="description" content="analog design — a small design studio. Apps, and sometimes objects.">
+<meta name="description" content="analog design studio. Lovingly crafted digital artifacts for the discerning and the obsessed.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gutter: 48px;                          /* space at the left and right edges */
+    --top: 72px;                             /* space above the logos */
+    --letter: clamp(40px, 6.5vw, 104px);     /* size of the letters down the right side */
+  }
   html, body { background: #fff; color: #000; }
-  body {
-    font-family: Helvetica, "Helvetica Neue", Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-  }
-  main { flex: 1; padding: 72px 48px 48px; }
+  body { font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 
-  /* ---- the logo grid ------------------------------------------------- */
+  /* ---- the logos: one line across the top, staying put as the page scrolls ---- */
   .grid {
+    position: fixed; z-index: 2;
+    top: var(--top); left: var(--gutter); right: calc(var(--gutter) * 2 + var(--letter));
+    max-width: 1500px;
     display: grid;
-    grid-template-columns: repeat(3, 200px);     /* six logos: three across, two down */
-    gap: 48px 64px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));   /* six logos on one line; change the 6 when you add one */
+    gap: clamp(10px, 3vw, 56px);
   }
-  .logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 200px;
-    height: 200px;
-    text-decoration: none;
-  }
+  .logo { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; text-decoration: none; }
   .logo img {
     display: block;
     max-width: 100%;
@@ -46,62 +39,141 @@
   @media (hover: none) { .logo img { opacity: 1; filter: none; } }
 
   /* per-logo sizing so the marks feel the same visual weight */
-  .logo.golfa img { width: 170px; }
-  .logo.roam img  { width: 150px; }
-  .logo.way img   { width: 150px; }
-  .logo.hew img   { width: 136px; }
-  .logo.lodge img { width: 150px; }   /* the horns alone, in LODGE brown once hovered */
-  .logo.summed img { width: 168px; }  /* the icon has white space around the S., so it runs larger */
+  .logo.golfa img  { width: 85%; }
+  .logo.roam img   { width: 75%; }
+  .logo.way img    { width: 75%; }
+  .logo.hew img    { width: 68%; }
+  .logo.lodge img  { width: 75%; }   /* the horns alone, dark brown once hovered */
+  .logo.summed img { width: 84%; }   /* the icon has white space around the S., so it runs larger */
 
-  /* ---- wordmark, bottom left ---------------------------------------- */
-  footer { padding: 0 48px 48px; }
-  .wordmark { display: inline-block; }
+  /* ---- DISAPPEARING LIGHT ON A SCREEN, one letter per line down the right side.
+          The script at the bottom of this file fades each letter out as it scrolls up. ---- */
+  .light {
+    width: var(--letter);
+    margin: 0 var(--gutter) 0 auto;
+    padding: var(--top) 0 22vh;          /* room under the last letter, so the page ends with SCREEN still on show */
+    font-weight: 700;
+    font-size: var(--letter);
+    line-height: 1;
+    text-align: center;
+  }
+  .light span { display: block; }
+  .light .space { height: 0.5em; }
+
+  /* ---- studio logo and line, bottom left, staying put as the page scrolls ---- */
+  footer {
+    position: fixed; z-index: 2;
+    left: var(--gutter); bottom: 48px; right: calc(var(--gutter) * 2 + var(--letter));
+    display: flex; align-items: flex-end; gap: clamp(14px, 2vw, 28px);
+  }
+  .wordmark { display: block; flex: none; }
   .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
+  .tagline { max-width: 21em; font-size: clamp(14px, 0.6vw + 11px, 22px); line-height: 1.25; }
 
   @media (max-width: 640px) {
-    main { padding: 40px 24px 32px; }
-    footer { padding: 0 24px 32px; }
-    .grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    .logo { width: auto; height: 140px; }
-    .logo.golfa img { width: 120px; }
-    .logo.roam img  { width: 104px; }
-    .logo.way img   { width: 104px; }
-    .logo.hew img   { width: 94px; }
-    .logo.lodge img { width: 104px; }
-    .logo.summed img { width: 116px; }
+    :root { --gutter: 24px; --top: 40px; }
+    .grid { right: var(--gutter); gap: 10px; }
+    /* on a phone the letters start under the row of logos */
+    .light { padding-top: calc(var(--top) + (100vw - 2 * var(--gutter) - 50px) / 6 + 28px); }
+    footer { bottom: 32px; }
   }
 </style>
 </head>
 <body>
-<main>
-  <!--
-    To add a project: copy one <a class="logo"> block, point it at the
-    project's folder and its SVG/PNG, and (optionally) add a width rule
-    above so it sits at the same visual weight as the others.
-  -->
-  <nav class="grid" aria-label="Projects">
-    <a class="logo golfa" href="/golfa/" title="golfa..">
-      <img src="/golfa/assets/golfer.svg" alt="golfa..">
-    </a>
-    <a class="logo roam" href="/roam/" title="roam">
-      <img src="/roam/sphere.svg" alt="roam">
-    </a>
-    <a class="logo way" href="/way/" title="Way">
-      <img src="/way/mark.svg" alt="Way">
-    </a>
-    <a class="logo hew" href="/hew/" title="Hew">
-      <img src="/hew/icon.svg" alt="Hew">
-    </a>
-    <a class="logo lodge" href="/LODGE/" title="LODGE">
-      <img src="/LODGE/horns.png" alt="LODGE">
-    </a>
-    <a class="logo summed" href="/Summed/" title="Summed.">
-      <img src="/Summed/icon.png" alt="Summed.">
-    </a>
-  </nav>
-</main>
+<!--
+  To add a project: copy one <a class="logo"> block, point it at the
+  project's folder and its SVG/PNG, add a width rule above so it sits at
+  the same visual weight as the others, and change repeat(6, …) to the
+  new number of logos.
+-->
+<nav class="grid" aria-label="Projects">
+  <a class="logo golfa" href="/golfa/" title="golfa..">
+    <img src="/golfa/assets/golfer.svg" alt="golfa..">
+  </a>
+  <a class="logo roam" href="/roam/" title="roam">
+    <img src="/roam/sphere.svg" alt="roam">
+  </a>
+  <a class="logo way" href="/way/" title="Way">
+    <img src="/way/mark.svg" alt="Way">
+  </a>
+  <a class="logo hew" href="/hew/" title="Hew">
+    <img src="/hew/icon.svg" alt="Hew">
+  </a>
+  <a class="logo lodge" href="/LODGE/" title="LODGE">
+    <img src="/LODGE/horns.png" alt="LODGE">
+  </a>
+  <a class="logo summed" href="/Summed/" title="Summed.">
+    <img src="/Summed/icon.png" alt="Summed.">
+  </a>
+</nav>
+
+<p class="light" role="img" aria-label="Disappearing light on a screen">
+    <span>D</span>
+    <span>I</span>
+    <span>S</span>
+    <span>A</span>
+    <span>P</span>
+    <span>P</span>
+    <span>E</span>
+    <span>A</span>
+    <span>R</span>
+    <span>I</span>
+    <span>N</span>
+    <span>G</span>
+    <span class="space"></span>
+    <span>L</span>
+    <span>I</span>
+    <span>G</span>
+    <span>H</span>
+    <span>T</span>
+    <span class="space"></span>
+    <span>O</span>
+    <span>N</span>
+    <span class="space"></span>
+    <span>A</span>
+    <span class="space"></span>
+    <span>S</span>
+    <span>C</span>
+    <span>R</span>
+    <span>E</span>
+    <span>E</span>
+    <span>N</span>
+</p>
+
 <footer>
   <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
+  <p class="tagline">lovingly crafted digital artifacts for the discerning and the obsessed</p>
 </footer>
+
+<script>
+/* Each letter is fully dark until you scroll. Then, as a letter climbs the screen,
+   it fades, and it is gone by the time it reaches the height where the D started. */
+(function () {
+  var letters = document.querySelectorAll('.light span:not(.space)');
+  if (!letters.length) return;
+  var FADE = 0.45;                 // letters fade over this share of the screen's height
+  var start = letters[0].getBoundingClientRect().top + (window.pageYOffset || 0);
+  var queued = false;
+  function paint() {
+    queued = false;
+    var zone = window.innerHeight * FADE;
+    var ramp = Math.min(1, (window.pageYOffset || 0) / zone);    // nothing fades before the first scroll
+    var tall = letters[0].offsetHeight;
+    for (var i = 0; i < letters.length; i++) {
+      var top = letters[i].getBoundingClientRect().top;
+      var gone = Math.max(0, Math.min(1, (start + zone - top) / zone)) * ramp;
+      var past = Math.max(0, Math.min(1, (start - top) / tall));     // above where the D started: always gone
+      letters[i].style.opacity = 1 - Math.max(gone, past);
+    }
+  }
+  function queue() { if (!queued) { queued = true; requestAnimationFrame(paint); } }
+  window.addEventListener('scroll', queue, { passive: true });
+  window.addEventListener('resize', function () {
+    start = letters[0].getBoundingClientRect().top + (window.pageYOffset || 0);
+    queue();
+  });
+  paint();
+})();
+</script>
 </body>
 </html>

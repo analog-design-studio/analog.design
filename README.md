@@ -63,11 +63,22 @@ below, in the order it appears on screen.
 
 ## App Store buttons
 
-roam, Way and Hew each have a "Download from the App Store" button at the top
-right of their pages: the `<a class="store" href="…">` line near the top of the
-page. golfa, LODGE and Summed have none. To add one once an app is approved,
+roam, Way, Hew and Summed each have a "Download from the App Store" button at
+the top right of their pages: the `<a class="store" href="…">` line near the
+top of the page. golfa and LODGE have none. To add one once an app is approved,
 copy that line into the page's `<header class="top">`, after the logo's
 closing `</a>`, with the app's own App Store link.
+
+## The home page
+
+- The six logos sit on one line across the top and stay there as the page
+  scrolls. When you add a logo, change `repeat(6, …)` in `.grid` to the new count.
+- "DISAPPEARING LIGHT ON A SCREEN" runs down the right side, one letter per
+  line (`<p class="light">`). The script at the bottom of `index.html` fades
+  each letter out as it scrolls up; `FADE` sets how much of the screen the fade
+  takes. `--letter` at the top of the styles sets the letter size.
+- The studio logo and the line beside it (`<p class="tagline">`) stay at the
+  bottom left.
 
 ## Addresses and capital letters
 
