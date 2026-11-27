@@ -1,178 +1,1505 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>analog design studio</title>
 <meta name="description" content="analog design studio. Lovingly crafted digital artifacts for the discerning and the obsessed.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script>document.documentElement.className = 'js';</script>
 <style>
+  /* =====================================================================
+     HOW THIS PAGE WORKS
+
+     The page is a stack of sections, one per app. Each section is several
+     screens tall (its --len) and holds one "stage" that sticks to the
+     screen while you scroll through it. Inside a stage, anything with a
+     data-at="start end" attribute is switched on between those two points,
+     measured in screens scrolled since the section took over the screen.
+
+     The script at the bottom of the file hands every data-at element four
+     numbers, and the styles below turn them into movement:
+       --on   0 to 1   how present it is (fades in, then out)
+       --in   0 to 1   how far it has arrived
+       --out  0 to 1   how far it has left
+       --u   -1 to 1   steady drift from arrival to departure
+
+     Three things float above everything: the letters down the right side
+     (they wait until the opening has played, then come up with the first
+     app), the studio logo and line at the bottom left, and the row of app
+     logos.
+
+     The page opens and closes with two set pieces, both driven by scrolling:
+     at the top the studio logo's letters fill the screen and gather into
+     the logo at the bottom left; after the last app, the app logos rise out
+     of the footer into a grid that fills the screen. (Parts 3 and 4 of the
+     script.)
+
+     Each app's header has its logo on the left and a small menu on the
+     right: Support, Privacy, Terms, then the App Store button, or
+     "coming soon" for an app that is not in the App Store yet.
+
+     Capitals follow each brand: roam is all lowercase, WAY and LODGE are
+     all capitals, Hew and Summed are written normally. For roam, WAY and
+     LODGE the styles enforce this (text-transform), so text typed either
+     way shows correctly.
+     ===================================================================== */
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --gutter: 48px;                          /* space at the left and right edges */
-    --top: 72px;                             /* space above the logos */
-    --letter: clamp(40px, 6.5vw, 104px);     /* size of the letters down the right side */
+    --gutter: 48px;                                   /* space at the left and right edges */
+    --top: 48px;                                      /* space above each section's header */
+    --letter: clamp(40px, 6.5vw, 104px);              /* size of the letters down the right side */
+    --side: calc(var(--gutter) * 2 + var(--letter));  /* right-hand strip kept clear for those letters */
+    --studio: clamp(64px, 8vw, 104px);                /* height of the studio logo */
+    --foot: calc(var(--studio) + 68px);               /* bottom strip kept clear for the footer */
+    --headroom: clamp(88px, 13vh, 132px);             /* space a section's header takes */
+    --vh: 100vh;
+    --avail: calc(var(--vh) - var(--top) - var(--foot) - var(--headroom));   /* height left for a section's content */
+    --m: 1;                                           /* drift and tilt: 1 = full, 0 = none */
   }
-  html, body { background: #fff; color: #000; }
-  body { font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  @supports (height: 100svh) { :root { --vh: 100svh; } }
+  @media (prefers-reduced-motion: reduce) { :root { --m: 0; } }
 
-  /* ---- the logos: one line across the top, staying put as the page scrolls ---- */
-  .grid {
-    position: fixed; z-index: 2;
-    top: var(--top); left: var(--gutter); right: calc(var(--gutter) * 2 + var(--letter));
-    max-width: 1500px;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));   /* six logos on one line; change the 6 when you add one */
-    gap: clamp(10px, 3vw, 56px);
+  html { background: #fff; }
+  body { font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #000; }
+  img { display: block; }
+
+  /* ---- sections and their sticky stages ------------------------------ */
+  .cover, .outro { --bg: #fff; --ink: #000; }
+  .app { position: relative; height: calc((var(--len) + 1) * 100vh); background: var(--bg); color: var(--ink); }
+  .stage { position: sticky; top: 0; height: var(--vh); overflow: hidden; }
+  .stage canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100vh; }
+  .safe { position: absolute; top: var(--top); left: var(--gutter); right: var(--side); bottom: var(--foot); }
+
+  /* every section's header: its logo on the left, its button and terms link on the right */
+  .head { position: absolute; z-index: 3; top: 0; left: 0; right: 0; opacity: var(--on); display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+  .mark { display: block; color: inherit; text-decoration: none; }
+  .mark img { height: clamp(40px, 4.6vw, 64px); width: auto; }
+  /* Support, Privacy and Terms sit to the left of the button, like a site's header menu */
+  .cta { display: flex; align-items: center; gap: clamp(14px, 1.8vw, 30px); }
+  .links { display: flex; gap: clamp(12px, 1.6vw, 26px); }
+  .links a { color: inherit; font-size: 14px; text-decoration: none; white-space: nowrap; }
+  .links a:hover { text-decoration: underline; text-underline-offset: 4px; }
+  .store { display: inline-block; padding: 13px 20px; border-radius: 8px; background: var(--ink); color: var(--bg); font-size: 15px; font-weight: 700; text-decoration: none; white-space: nowrap; }
+  .store:hover { opacity: 0.85; }
+  /* for an app that is not on the App Store yet: a plain label, no button */
+  .soon { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; padding: 11px 16px; border: 1px solid currentColor; border-radius: 99px; white-space: nowrap; }
+
+  /* a "beat" is one moment in a section: some words, usually with a phone beside them */
+  [data-at] { --on: 1; --in: 1; --out: 0; --u: 0; --r: 0; }
+  .beat { position: absolute; top: var(--headroom); left: 0; right: 0; bottom: 0; }
+  .solo { display: flex; align-items: center; }
+  .duo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 4vw; align-items: center; }
+  .duo.flip .words { order: 2; }
+  .visual { height: 100%; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .phone { height: calc(var(--avail) * 0.96); width: auto; }
+
+  /* Three pieces travel between two places: golfa's golfer and roam's sphere shrink into their logos, and
+     LODGE's white antlers start out lying over the buck's own. Each says what it lines up with:
+       data-joins=".roam .mark img"    the picture it joins
+       data-spot="0.37 0.42 0.67"      where on that picture: centre across, centre down, and height, as shares of it
+     The script measures the trip and hands the piece --dx, --dy (how far) and --k (how much smaller or larger).
+     The piece's own styles decide when it goes: its --away runs from 0 (its own place) to 1 (on the spot). */
+
+  /* words materialise: they sharpen, rise and fade in, then carry on up and out */
+  .words {
+    opacity: var(--on);
+    transform: translate3d(0, calc(var(--u) * -6vh * var(--m)), 0);
+    filter: blur(calc((1 - var(--on)) * 12px));
   }
-  .logo { display: flex; align-items: center; justify-content: center; aspect-ratio: 1 / 1; text-decoration: none; }
-  .logo img {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-    opacity: 0.3;
-    filter: grayscale(1);
-    transition: opacity .25s ease, filter .25s ease;
+  .settled .words, .words.settled { filter: none; }
+  .words h2 { font-size: clamp(30px, 4.2vw, 76px); line-height: 1.02; letter-spacing: -0.03em; font-weight: 700; margin-bottom: 0.45em; }
+  .words p { font-size: clamp(15px, 0.6vw + 11px, 24px); line-height: 1.45; max-width: 34em; }
+  .words p + p { margin-top: 0.9em; }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.7; margin-bottom: 18px; }
+
+  /* an empty iPhone outline, for apps that have no renderings yet */
+  .slots { position: relative; height: calc(var(--avail) * 0.96); aspect-ratio: 1 / 1.2; max-width: 100%; }
+  .slot { position: absolute; height: 80%; aspect-ratio: 438 / 913; border: 1.5px solid currentColor; border-radius: 15% / 7.2%; opacity: calc(var(--on) * 0.6); }
+  .slot::before { content: ""; position: absolute; top: 2.4%; left: 50%; width: 30%; height: 3.3%; margin-left: -15%; border-radius: 99px; background: currentColor; opacity: 0.55; }
+  .slot:nth-child(1) { left: 2%; top: 0; transform: translate3d(0, calc((1 - var(--in)) * 60vh + var(--u) * -5vh * var(--m)), 0) rotate(calc(-7deg + var(--u) * 5deg * var(--m))); }
+  .slot:nth-child(2) { right: 2%; bottom: 0; transform: translate3d(0, calc((1 - var(--in)) * 95vh + var(--u) * -11vh * var(--m)), 0) rotate(calc(6deg + var(--u) * -8deg * var(--m))); }
+
+  /* =============================== golfa.. =============================== */
+  .golfa { --bg: #1A3A1A; --ink: #FAFAF8; font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .golfa .mark img { height: clamp(64px, 8vw, 112px); }
+  .golfa .words h2 { font-weight: 300; letter-spacing: -0.02em; }
+  .golfa .soon { letter-spacing: 0.08em; font-size: 12px; }
+  /* the golfer starts out large beside the words, then shrinks into his place in the logo at the top left,
+     which is drawn without him until he gets there. --tee: when he sets off, in screens scrolled. */
+  .golfa { --tee: 0.75; }
+  .golfer {
+    height: calc(var(--avail) * 0.8); width: auto; max-width: 100%;
+    visibility: visible;                                            /* he stays after the words beside him have gone */
+    --go: clamp(0, calc((var(--s, 0) - var(--tee)) / 0.65), 1);
+    --away: calc(var(--go) * var(--go) * (3 - 2 * var(--go)));      /* 0: in his own place. 1: in the logo. */
+    opacity: var(--in);
+    transform: translate3d(calc(var(--dx, 0px) * var(--away) + var(--u) * -3vw * var(--m) * (1 - var(--away))), calc(var(--dy, 0px) * var(--away)), 0)
+      scale(calc((0.84 + var(--in) * 0.16) * (1 + (var(--k, 1) - 1) * var(--away))));
+    filter: blur(calc((1 - var(--in)) * 16px));
   }
-  .logo:hover img, .logo:focus-visible img { opacity: 1; filter: none; }
-  .logo:focus-visible { outline: none; }
-  @media (hover: none) { .logo img { opacity: 1; filter: none; } }
 
-  /* per-logo sizing so the marks feel the same visual weight */
-  .logo.golfa img  { width: 85%; }
-  .logo.roam img   { width: 75%; }
-  .logo.way img    { width: 75%; }
-  .logo.hew img    { width: 68%; }
-  .logo.lodge img  { width: 75%; }   /* the horns alone, dark brown once hovered */
-  .logo.summed img { width: 84%; }   /* the icon has white space around the S., so it runs larger */
+  /* ================================ roam ================================ */
+  /* roam speaks in lowercase, always */
+  .roam { --bg: #000; --ink: #fff; --orange: #FF5412; text-transform: lowercase; }
+  .roam .eyebrow { text-transform: lowercase; letter-spacing: 0.08em; font-size: 13px; font-weight: 400; }
+  .roam .mark img { height: clamp(34px, 4vw, 54px); }
+  .roam .words h2 { font-weight: 300; letter-spacing: -0.02em; color: var(--orange); font-size: clamp(34px, 4.8vw, 84px); }
+  .roam .solo h2 { color: #fff; max-width: 15em; }
+  /* the sphere comes out of the dark: far, soft and small, then near and sharp. Then it shrinks into its
+     place as the "o" of the wordmark at the top left, which is drawn without it until it gets there.
+     --home: when it sets off for the wordmark, in screens scrolled. */
+  .roam { --home: 0.8; }
+  .orb {
+    position: absolute; top: 0; bottom: 8%; left: 0; right: 0; margin: auto;      /* centred, a little above the middle */
+    width: min(calc(var(--avail) * 0.9), 64vw); height: auto; aspect-ratio: 1 / 1;
+    --go: clamp(0, calc((var(--s, 0) - var(--home)) / 0.7), 1);
+    --away: calc(var(--go) * var(--go) * (3 - 2 * var(--go)));      /* 0: in its own place. 1: in the wordmark. */
+    opacity: var(--in);
+    transform: translate3d(calc(var(--dx, 0px) * var(--away)), calc(var(--dy, 0px) * var(--away)), 0)
+      scale(calc((0.08 + var(--in) * 0.92) * (1 + (var(--k, 1) - 1) * var(--away)))) rotate(calc((1 - var(--in)) * -40deg * var(--m)));
+    filter: blur(calc((1 - var(--in)) * 28px));
+  }
+  .intro { position: absolute; left: 0; right: 0; bottom: 3vh; display: flex; justify-content: space-between; color: var(--orange); font-weight: 300; font-size: clamp(20px, 1.5vw + 12px, 36px); line-height: 1; opacity: var(--on); }
+  /* the phones turn in space as they pass; dark on dark, so they can run large and slip under the footer */
+  .roam .visual { overflow: visible; }
+  .roam .phone {
+    height: calc(var(--avail) * 1.14);
+    opacity: var(--on);
+    transform: perspective(1400px)
+      translate3d(calc(var(--u) * -4vw * var(--m)), calc(var(--u) * -9vh * var(--m)), calc((var(--on) - 1) * 700px))
+      rotateY(calc(var(--u) * -26deg * var(--m))) rotateZ(calc(var(--u) * 5deg * var(--m)));
+  }
+  .roam .flip .phone {
+    transform: perspective(1400px)
+      translate3d(calc(var(--u) * 4vw * var(--m)), calc(var(--u) * -9vh * var(--m)), calc((var(--on) - 1) * 700px))
+      rotateY(calc(var(--u) * 26deg * var(--m))) rotateZ(calc(var(--u) * -5deg * var(--m)));
+  }
 
-  /* ---- DISAPPEARING LIGHT ON A SCREEN, one letter per line down the right side.
-          The script at the bottom of this file fades each letter out as it scrolls up. ---- */
+  /* ================================ WAY ================================= */
+  /* WAY speaks in capitals, always */
+  .way { --bg: #E7E4DA; --ink: #0D0D0D; --pop: #CC5500; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; text-transform: uppercase; }
+  .way .links a { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; }
+  .way .solo .words h2 { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
+  .way .words p { font-family: var(--mono); font-size: clamp(12px, 0.35vw + 10px, 17px); letter-spacing: 0.06em; line-height: 1.7; max-width: 46em; }
+  .way canvas { opacity: 0.08; }                      /* how faded the turning wheels are */
+  .way .mark img { height: clamp(48px, 5.4vw, 76px); }
+  .way .store { border-radius: 0; padding: 15px 18px; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; }
+  .way .store:hover { background: var(--pop); opacity: 1; }
+  .caps { font-family: "Arial Black", "Helvetica Neue", Helvetica, Arial, sans-serif; font-weight: 900; text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.92; }
+  .caps b { color: var(--pop); font-weight: inherit; }
+  .way .hero h2 { font-size: clamp(50px, 9.4vw, 168px); margin-bottom: 0.1em; }
+  .way .hero .version { font-size: clamp(22px, 3vw, 54px); margin-bottom: 0.5em; }
+  .wheel { height: calc(var(--avail) * 0.92); width: auto; max-width: 100%; opacity: var(--on); transform: rotate(calc(var(--s) * 150deg)); }
+  /* the filmstrip: ten phones in a row, drawn across the screen as you scroll.
+     Its window fades the phones in at the right and out at the left, clear of the floating letters. */
+  .window {
+    position: absolute; top: 0; bottom: calc(var(--foot) * -1); left: calc(var(--gutter) * -1); right: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 9%, #000 86%, transparent);
+            mask-image: linear-gradient(90deg, transparent, #000 9%, #000 86%, transparent);
+  }
+  .strip {
+    --ph: calc(var(--avail) * 0.76);                  /* phone height */
+    --frame: calc(var(--ph) * 0.62);                  /* width of one caption-and-phone */
+    --gap: calc(var(--ph) * 0.16);
+    position: absolute; top: var(--headroom); left: var(--gutter); bottom: var(--foot); display: flex; gap: var(--gap);
+    transform: translate3d(calc((1 - var(--r)) * 100vw + var(--r) * (-9 * (var(--frame) + var(--gap)) + (100vw - var(--gutter) - var(--side) - var(--frame)) / 2)), 0, 0);
+  }
+  .frame { flex: none; width: var(--frame); display: flex; flex-direction: column; align-items: center; gap: calc(var(--ph) * 0.045); }
+  .frame h3 { align-self: stretch; font-size: calc(var(--frame) / 10.6); }
+  .frame img { height: var(--ph); width: auto; transform: rotate(calc((var(--r) - 0.5) * 18deg * var(--m))); }
+  .frame:nth-child(even) img { transform: rotate(calc((0.5 - var(--r)) * 18deg * var(--m))); }
+
+  /* ================================ Hew ================================= */
+  /* Hew is capitalised normally */
+  .hew { --bg: #FF5412; --ink: #12130D; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .hew .eyebrow, .summed .eyebrow { text-transform: none; letter-spacing: 0.02em; font-size: 13px; }
+  .hew .mark, .say { font-weight: 700; line-height: 0.92; letter-spacing: -0.041em; }
+  .hew .mark { font-size: clamp(46px, 6.3vw, 98px); }
+  /* the phones peek in from an edge: the left side, the top, or up from behind the footer */
+  .peek { position: absolute; z-index: 1; --ph: min(78vh, 62vw); --pw: calc(var(--ph) * 0.4797); --show: 0.56; }
+  .peek img { width: var(--pw); height: var(--ph); }
+  .from-top { top: 0; left: calc((100vw - var(--side)) * 0.47); transform: translate3d(-50%, calc(-100% + var(--on) * var(--show) * 100% + var(--u) * 3% * var(--m)), 0); }
+  .from-top img { transform: rotate(180deg); }
+  .from-bottom { bottom: var(--foot); left: calc((100vw - var(--side)) * 0.6); transform: translate3d(-50%, calc(100% - var(--on) * var(--show) * 100% - var(--u) * 3% * var(--m)), 0); }
+  .from-left { left: 0; top: calc((var(--vh) - var(--foot)) / 2 + 36px); width: var(--ph); height: var(--pw); transform: translate3d(calc(-100% + var(--on) * var(--show) * 100% + var(--u) * 3% * var(--m)), -50%, 0); }
+  .from-left img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg); }
+  /* the phone that hangs from the top sits in the gap between the name and the menu, and is never wider than that gap.
+     --markw: room for the word "Hew"; --menuw: room for the menu and button; --slot: what is left between them */
+  @media (min-width: 761px) {
+    .hew { --markw: clamp(94px, 12.9vw, 201px); --menuw: 500px; }
+    .hew .from-top { --slot: calc(100vw - var(--side) - var(--gutter) - var(--markw) - var(--menuw)); --pw: min(calc(var(--ph) * 0.4797), calc(var(--slot) - 48px)); left: calc(var(--gutter) + var(--markw) + var(--slot) / 2); }
+    .hew .from-top img { height: calc(var(--pw) / 0.4797); }
+  }
+  @media (min-width: 761px) and (max-width: 1099px) {       /* not enough room for one line: the menu goes above the button */
+    .hew { --menuw: 266px; }
+    .hew .cta { flex-direction: column; align-items: flex-end; gap: 10px; }
+  }
+  /* what each phone is showing, set like the logo */
+  .say { position: absolute; z-index: 2; font-size: clamp(44px, 7vw, 118px); opacity: var(--on); transform: translate3d(0, calc(var(--u) * -4vh * var(--m)), 0); }
+  .say.for-left { right: 0; top: 50%; margin-top: -1em; text-align: right; }
+  .say.for-top { left: 0; bottom: 3vh; }
+  .say.for-bottom { left: 0; top: calc(var(--headroom) + 4vh); }
+  .say.tagline-stack { right: 0; bottom: 3vh; text-align: right; }
+
+  /* =============================== LODGE ================================ */
+  /* LODGE speaks in capitals, always */
+  .lodge { text-transform: uppercase; --bg: #110903; --ink: #F2EEE4; --hero: #FF6700; --leather: #A4723F; font-family: -apple-system, BlinkMacSystemFont, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .lodge .mark { --h: clamp(48px, 5.4vw, 80px); display: flex; align-items: center; gap: calc(var(--h) * 0.286); }
+  .lodge .mark img { height: var(--h); }
+  .lodge .mark span, .lodge .words h2 { font-family: -apple-system, system-ui, "Helvetica Neue", "Arial Narrow", sans-serif; font-stretch: condensed; font-weight: 800; }
+  .lodge .mark span { font-size: calc(var(--h) * 0.714); line-height: 1; letter-spacing: 0.1em; }
+  .lodge .words h2 { text-transform: uppercase; letter-spacing: 0; color: var(--hero); font-size: clamp(32px, 4.6vw, 82px); line-height: 0.98; }
+  .lodge .solo .words { max-width: 46em; }
+  .lodge .words p { font-size: clamp(14px, 0.6vw + 10px, 22px); letter-spacing: 0.04em; line-height: 1.5; }
+  .lodge .slot { color: var(--leather); opacity: var(--on); }
+  /* LODGE's opening. A buck looks straight at you. His antlers turn LODGE white, he sinks back into the
+     dark, and the antlers grow and move aside to make room for the words.
+     The three moments, in screens scrolled since the section took over: */
+  .lodge {
+    --turn: 0.45;       /* the antlers start to turn white, as the buck starts to sink back */
+    --part: 1.2;        /* they start to grow and move to their place beside the words */
+    --done: 2.75;       /* they leave, with the words */
+  }
+  .buck {
+    position: absolute; top: calc(var(--headroom) * 0.3); bottom: 0; left: 0; right: 0; margin: auto;      /* his antlers reach up between the logo and the menu */
+    height: min(var(--avail) + var(--headroom) * 0.7, (100vw - var(--gutter) - var(--side)) * 1.25); width: auto; aspect-ratio: 4 / 5;
+    opacity: var(--on);
+    transform: translate3d(0, calc(var(--out) * 3vh * var(--m)), 0) scale(calc(1 - var(--out) * 0.3));      /* --out: he backs away */
+    filter: blur(calc(var(--out) * 10px));
+  }
+  /* the white antlers start out lying over the buck's own, and the numbers above bring them home */
+  .horns {
+    width: 100%; height: calc(var(--avail) * 0.84); object-fit: contain;
+    visibility: visible;                                            /* on screen before the words beside them are */
+    --white: clamp(0, calc((var(--s, 0) - var(--turn)) / 0.45), 1);
+    --go: clamp(0, calc((var(--s, 0) - var(--part)) / 0.75), 1);
+    --away: calc(1 - var(--go) * var(--go) * (3 - 2 * var(--go)));  /* 1: over the buck's antlers. 0: in their own place. */
+    --gone: clamp(0, calc((var(--s, 0) - var(--done)) / 0.25), 1);
+    opacity: calc(var(--white) * (1 - var(--gone)));
+    transform: translate3d(calc(var(--dx, 0px) * var(--away)), calc(var(--dy, 0px) * var(--away)), 0) scale(calc(1 + (var(--k, 1) - 1) * var(--away)));
+  }
+
+  /* =============================== Summed =============================== */
+  @font-face { font-family: "Cardo"; src: url(/Summed/fonts/Cardo-Regular.woff) format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Cardo"; src: url(/Summed/fonts/Cardo-Bold.woff) format("woff"); font-weight: 700; font-style: normal; font-display: swap; }
+  /* Summed is capitalised normally */
+  .summed { --bg: #FFFFFF; --ink: #000000; --accent: #CC5500; --serif: "Cardo", Georgia, "Times New Roman", serif; --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; font-family: var(--mono); }
+  .summed .mark { display: block; width: clamp(64px, 7vw, 96px); height: clamp(64px, 7vw, 96px); margin: -8px 0 0 -14px; }    /* empty until the S. arrives */
+  .summed .store { border-radius: 3px; padding: 14px 16px; font-family: var(--mono); font-size: 13px; }
+  .summed .words h2 { font-family: var(--serif); font-weight: 400; letter-spacing: -0.01em; font-size: clamp(34px, 5vw, 92px); }
+  .summed b { color: var(--accent); font-weight: inherit; }
+  /* The name. It starts as the word "Summed." across the screen. As you scroll, the period sweeps left over
+     the letters until only "S." is left, while the whole thing shrinks toward the top left corner, where it
+     becomes the logo. --sum: when that starts, in screens scrolled.
+     .name is a box the shape of the S. icon, sized so the icon's S and the word's S are the same S; the word
+     hangs out of its right side. The numbers in em are where Cardo's S sits, so they go with the typeface. */
+  .summed { --sum: 0.15; }
+  .title { pointer-events: none; }
+  .name {
+    position: relative; width: 1.28em; height: 1.28em; margin: -0.225em 0 -0.075em -0.2975em;
+    font-family: var(--serif); font-size: clamp(72px, 14.5vw, 250px);
+    --go: clamp(0, calc((var(--s, 0) - var(--sum)) / 1.2), 1);
+    --away: calc(var(--go) * var(--go) * (3 - 2 * var(--go)));      /* 0: the title. 1: the logo in the corner. */
+    --fold: clamp(0, calc(var(--go) / 0.55), 1);                    /* 0: "Summed."  1: "S." */
+    --seal: clamp(0, calc((var(--go) - 0.78) / 0.12), 1);           /* near the end the icon itself fades in over the letters and covers them */
+    opacity: var(--in);
+    transform: translate3d(calc(var(--dx, 0px) * var(--away)), calc(var(--dy, 0px) * var(--away)), 0) scale(calc(1 + (var(--k, 1) - 1) * var(--away)));
+    filter: blur(calc((1 - var(--in)) * 12px));
+  }
+  .name.settled { filter: none; }
+  .name h2 { position: absolute; left: 0.2975em; top: 0.225em; margin: 0; font-size: 1em; font-weight: 400; line-height: 0.9; letter-spacing: -0.01em; white-space: nowrap; }
+  /* "ummed": the period moves in over it from the right, and the letters fade just ahead of the period
+     (--w, the width of those letters, comes from the script) */
+  .name .rest {
+    display: inline-block; padding: 0.15em 0; margin: -0.15em calc(var(--fold) * var(--w, 3.18em) * -1) -0.15em 0;
+    --edge: calc((1 - var(--fold)) * 100%);                         /* where the period has got to */
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(var(--edge) - 0.3em * clamp(0, var(--fold) * 8, 1)), transparent var(--edge));
+            mask-image: linear-gradient(90deg, #000 calc(var(--edge) - 0.3em * clamp(0, var(--fold) * 8, 1)), transparent var(--edge));
+  }
+  .name b { margin-left: calc(var(--fold) * -0.03em); }             /* the icon's period sits a hair closer to its S */
+  .name .seal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: var(--seal); }
+  .summed .title .words { transform: none; }                      /* the line under the name fades where it stands */
+  .summed .words p { font-size: clamp(13px, 0.3vw + 11px, 17px); line-height: 1.7; max-width: 38em; }
+  .summed .title .words p { font-size: clamp(18px, 2.7vw, 46px); line-height: 1.2; }
+  .summed .duo:nth-of-type(odd) .words { align-self: start; margin-top: 6vh; }
+  .summed .duo:nth-of-type(even) .words { align-self: end; margin-bottom: 8vh; }
+  /* each phone rises into place, then slips off to the left as the next one comes up */
+  .summed .phone {
+    filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.18));
+    opacity: calc(1 - var(--out));
+    transform: translate3d(calc(var(--out) * -24vw), calc((1 - var(--in)) * 95vh + var(--u) * -3vh * var(--m)), 0)
+      rotate(calc((1 - var(--in)) * 9deg - var(--out) * 12deg)) scale(calc(1 - var(--out) * 0.2));
+  }
+
+  /* ---- floating above everything: the letters down the right side ---- */
   .light {
-    width: var(--letter);
-    margin: 0 var(--gutter) 0 auto;
-    padding: var(--top) 0 22vh;          /* room under the last letter, so the page ends with SCREEN still on show */
-    font-weight: 700;
-    font-size: var(--letter);
-    line-height: 1;
-    text-align: center;
+    position: fixed; z-index: 21; top: var(--top); right: var(--gutter); width: var(--letter);
+    font-family: Helvetica, "Helvetica Neue", Arial, sans-serif; font-weight: 700; font-size: var(--letter); line-height: 1; text-align: center;
+    pointer-events: none;
   }
-  .light span { display: block; }
+  .light span { display: block; transition: color 0.2s; }
   .light .space { height: 0.5em; }
 
-  /* ---- studio logo and line, bottom left, staying put as the page scrolls ---- */
-  footer {
-    position: fixed; z-index: 2;
-    left: var(--gutter); bottom: 48px; right: calc(var(--gutter) * 2 + var(--letter));
+  /* ---- floating above everything: studio logo, line and app logos ---- */
+  .base {
+    position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; height: var(--foot);
+    padding: 0 var(--side) 48px var(--gutter);
     display: flex; align-items: flex-end; gap: clamp(14px, 2vw, 28px);
+    color: var(--ink, #000); background: var(--band, transparent);
+    transition: color 0.2s;
+    pointer-events: none;
   }
-  .wordmark { display: block; flex: none; }
-  .wordmark img { display: block; height: clamp(64px, 8vw, 104px); width: auto; }
-  .tagline { max-width: 21em; font-size: clamp(14px, 0.6vw + 11px, 22px); line-height: 1.25; }
+  .base > * { pointer-events: auto; }
+  .studio { flex: none; display: block; width: calc(var(--studio) * 1.6413); height: var(--studio); }   /* the logo lands here */
+  .studio img { height: var(--studio); width: auto; }
+  .studio-logo { position: fixed; z-index: 22; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  /* each letter is drawn twice: solid and clean for the opening, and exactly as in the logo, with its
+     fine white outlines, once the black plate is behind it. --formed (0 to 1) fades the second one in. */
+  .studio-logo .lines { opacity: var(--formed, 1); }
+  .studio-logo.plain .lines { display: none; }
+  .no-js .studio-logo { display: none; }
+  .tagline { flex: none; width: min(13em, 24vw); font-size: clamp(14px, 0.6vw + 11px, 22px); line-height: 1.25; }
+  /* the app logos, in one colour that follows the section behind them; tap one to jump to its section */
+  .dock { flex: 1; min-width: 0; max-width: 700px; margin-left: clamp(0px, 2vw, 40px); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 1.6vw, 28px); align-items: end; }
+  .dock a {
+    display: block; aspect-ratio: 1 / 1; max-height: var(--studio);
+    padding: calc((100% - var(--fit, 84%)) / 2);        /* --fit: how much of its square each logo fills */
+    color: inherit; background-color: currentColor;
+    -webkit-mask: var(--shape) center / contain no-repeat content-box; mask: var(--shape) center / contain no-repeat content-box;
+    opacity: 0.34; transition: opacity 0.25s;
+  }
+  .dock a:hover, .dock a:focus-visible, .dock a.on { opacity: 1; outline: none; }
+  .lifted .dock a { opacity: 0; pointer-events: none; transition: none; }      /* during the closing grid the logos are up there instead */
 
-  @media (max-width: 640px) {
-    :root { --gutter: 24px; --top: 40px; }
-    .grid { right: var(--gutter); gap: 10px; }
-    /* on a phone the letters start under the row of logos */
-    .light { padding-top: calc(var(--top) + (100vw - 2 * var(--gutter) - 50px) / 6 + 28px); }
-    footer { bottom: 32px; }
+  /* ---- the closing grid: the same logos, grown to fill the screen ----- */
+  .grid { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); visibility: hidden; }
+  .grid a { display: flex; align-items: center; justify-content: center; min-width: 0; min-height: 0; color: inherit; }
+  .tile { position: relative; display: block; width: var(--tile, 22vmin); height: var(--tile, 22vmin); --mono: 0; }
+  .tile .shape, .tile img { position: absolute; top: 50%; left: 50%; width: var(--fit); height: var(--fit); transform: translate(-50%, -50%); }
+  .tile .shape { background-color: currentColor; -webkit-mask: var(--shape) center / contain no-repeat; mask: var(--shape) center / contain no-repeat; opacity: calc(var(--mono) * var(--dim, 1)); }
+  .tile img { object-fit: contain; opacity: calc(1 - var(--mono)); }
+
+  /* ---- phones and narrow windows -------------------------------------- */
+  @media (max-width: 760px) {
+    :root { --gutter: 24px; --top: 32px; --foot: calc(var(--studio) + 104px); --headroom: 112px; }
+    /* header: logo and menu on the first line, the button under the menu. golfa and Summed have tall logos
+       and short buttons, so there the button tucks in beside the logo. In the others the button drops to a
+       line of its own (and on a very narrow phone so does the menu), so nothing runs under the floating letters. */
+    .cta { flex-direction: column; align-items: flex-end; gap: 10px; }
+    .roam .head, .way .head, .hew .head, .lodge .head { flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px 10px; }
+    .roam .mark, .way .mark, .hew .mark, .lodge .mark { margin-right: auto; }
+    .roam .cta, .way .cta, .hew .cta, .lodge .cta { display: contents; }
+    .roam .links, .lodge .links { gap: 10px; }
+    .lodge .links a { font-size: 11px; }
+    .way .mark img { height: 40px; }
+    .links { gap: 12px; }
+    .links a { font-size: 12px; }
+    .store { padding: 11px 14px; font-size: 13px; }
+    .way .store { padding: 12px 12px; font-size: 10px; letter-spacing: 0.1em; }
+    .way .links a { font-size: 10px; }
+    .summed .store { padding: 11px 12px; font-size: 11px; }
+    .summed .links a { font-size: 11px; }
+    .soon { padding: 9px 13px; font-size: 10px; }
+    .hew .mark { font-size: 40px; }
+    .duo, .duo.flip { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 2vh; align-items: start; }
+    .duo.flip .words { order: 0; }
+    /* a picture sits in the middle of the room the words leave; if it is taller than that room it starts
+       right under the words and runs down behind the footer, rather than riding up over them */
+    .visual { align-items: flex-start; }
+    .visual > * { margin-top: auto; margin-bottom: auto; }
+    .phone { height: calc(var(--avail) * 0.6); }
+    .roam .phone { height: calc(var(--avail) * 0.74); }
+    .lodge .mark { --h: 26px; }
+    .slots { height: calc(var(--avail) * 0.6); }
+    .golfer, .wheel { height: calc(var(--avail) * 0.46); }
+    .horns { height: 100%; max-height: calc(var(--avail) * 0.5); }        /* whatever room the words leave */
+    .lodge .words h2 { font-size: clamp(24px, 7.2vw, 30px); }             /* a little smaller, so the antlers keep some of that room */
+    .solo { align-items: flex-start; padding-top: 4vh; }
+    .way .solo .words h2 { font-size: clamp(22px, 6.6vw, 30px); }
+    .summed .solo .words h2 { font-size: clamp(24px, 7vw, 34px); }
+    .strip { --ph: calc(var(--avail) * 0.68); }
+    .summed .duo:nth-of-type(odd) .words, .summed .duo:nth-of-type(even) .words { align-self: start; margin: 0; }
+    .name { font-size: min(72px, (100vw - var(--gutter) - var(--side)) / 3.95); }      /* the whole word fits beside the floating letters */
+    /* no room to hang a phone from the top beside the header, so those come in from the left as well.
+       --say: the size of the big captions. --room: the height between the header and a four-line caption at
+       the bottom, which is where the phones from the left sit; on a short screen the phones shrink to fit it. */
+    .hew { --say: clamp(40px, 12vw, 72px); --room: calc(var(--vh) - var(--foot) - var(--top) - 96px - var(--say) * 3.68 - 8px); }
+    .peek { --ph: min(64vh, 118vw, (var(--room) - 12px) / 0.4797); }
+    .from-top { top: calc(var(--top) + 96px + var(--room) / 2); left: 0; width: var(--ph); height: var(--pw); transform: translate3d(calc(-100% + var(--on) * var(--show) * 100% + var(--u) * 3% * var(--m)), -50%, 0); }
+    .from-top img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(90deg); }
+    .from-left { top: calc(var(--top) + 96px + var(--room) / 2); }
+    .from-bottom { left: calc((100vw - var(--side)) * 0.5 + var(--gutter)); }
+    .say { font-size: var(--say); }
+    .say.for-left, .say.for-top, .say.tagline-stack { left: auto; right: 0; top: auto; bottom: 1vh; margin: 0; text-align: right; }
+    .say.for-bottom { top: var(--headroom); }
+    /* footer: the app logos get their own row above the studio logo and line */
+    .base { flex-wrap: wrap; align-content: flex-end; padding-bottom: 28px; row-gap: 14px; }
+    .dock { order: -1; flex-basis: 100%; max-width: none; margin: 0; gap: 10px; }
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); }
+    .tagline { flex: 1; width: auto; font-size: 13px; }
   }
+
+  /* ---- short phones: a little less air, so the longest passages still clear the footer ---- */
+  @media (max-width: 760px) and (max-height: 720px) {
+    .solo { padding-top: 0; }
+    .eyebrow { margin-bottom: 10px; }
+    .words h2 { margin-bottom: 0.35em; }
+    .way .words p, .summed .words p { line-height: 1.5; }
+    .wheel { height: calc(var(--avail) * 0.36); }
+    .summed .words p { font-size: 12px; }
+  }
+
+  /* ---- without the script: everything simply sits in order down the page ---- */
+  .no-js .app { height: auto; }
+  .no-js .stage { position: static; height: auto; overflow: visible; }
+  .no-js .safe { position: static; padding: var(--top) var(--side) 12vh var(--gutter); }
+  .no-js .head, .no-js .beat, .no-js .say, .no-js .peek, .no-js .strip, .no-js .orb, .no-js .intro { position: static; transform: none; margin-top: 8vh; }
+  .no-js .strip { flex-wrap: wrap; }
+  .no-js .window { position: static; -webkit-mask-image: none; mask-image: none; }
+  .no-js .grid { position: static; visibility: visible; min-height: 80vh; }
+  .no-js .buck { position: static; display: block; height: 60vh; margin: 8vh auto 0; transform: none; filter: none; }
+  .no-js .horns { opacity: 1; transform: none; height: 40vh; }
+  .no-js .golfer { transform: none; }
+  .no-js .summed .mark { background: url(/Summed/icon.png) center / contain no-repeat; }
+  .no-js .orb { display: block; margin: 8vh auto 0; }
+  .no-js .peek, .no-js .peek img, .no-js .from-left img { width: auto; height: 50vh; position: static; transform: none; }
+  .no-js canvas { display: none; }
+  .no-js body { padding-bottom: var(--foot); }
 </style>
 </head>
 <body>
-<!--
-  To add a project: copy one <a class="logo"> block, point it at the
-  project's folder and its SVG/PNG, add a width rule above so it sits at
-  the same visual weight as the others, and change repeat(6, …) to the
-  new number of logos.
--->
-<nav class="grid" aria-label="Projects">
-  <a class="logo golfa" href="/golfa/" title="golfa..">
-    <img src="/golfa/assets/golfer.svg" alt="golfa..">
-  </a>
-  <a class="logo roam" href="/roam/" title="roam">
-    <img src="/roam/sphere.svg" alt="roam">
-  </a>
-  <a class="logo way" href="/way/" title="Way">
-    <img src="/way/mark.svg" alt="Way">
-  </a>
-  <a class="logo hew" href="/hew/" title="Hew">
-    <img src="/hew/icon.svg" alt="Hew">
-  </a>
-  <a class="logo lodge" href="/LODGE/" title="LODGE">
-    <img src="/LODGE/horns.png" alt="LODGE">
-  </a>
-  <a class="logo summed" href="/Summed/" title="Summed.">
-    <img src="/Summed/icon.png" alt="Summed.">
-  </a>
-</nav>
 
+<!-- The opening: a white screen that stays put while the studio logo's letters, which start
+     out filling it, gather into the logo at the bottom left. --len is how long that takes. -->
+<section class="app cover" id="top" data-ink="#000000" style="--len: 1.2">
+  <div class="stage"></div>
+</section>
+
+
+<!-- ============================== golfa.. ==============================
+     data-band (here and on Hew, LODGE and Summed): the footer strip is a solid band of the
+     section's colour, so phones can rise from behind it. roam and WAY leave it see-through. -->
+<section class="app golfa" id="golfa" data-ink="#FAFAF8" data-band style="--len: 2.6">
+  <div class="stage"><div class="safe">
+    <header class="head" data-at="-0.45 99" data-fade="0.3">
+      <!-- the logo without its golfer: he arrives from the middle of the section as you scroll -->
+      <a class="mark" href="/golfa/"><img src="/golfa/assets/golfa-wordmark-white.svg" alt="golfa.. preserve the game"></a>
+<nav class="cta" aria-label="golfa..">
+          <span class="links"><a href="/golfa/#privacy">Privacy</a><a href="/golfa/#terms">Terms</a></span>
+          <span class="soon">coming soon</span>
+        </nav>
+    </header>
+
+    <div class="beat duo" data-at="-0.2 0.9" data-fade="0.35 0.25">
+      <div class="words">
+        <p class="eyebrow">golfa.. by Preserve the Game</p>
+        <h2>A private club for serious golfers.</h2>
+      </div>
+      <div class="visual"><img class="golfer" src="/golfa/assets/golfer-white.svg" alt="" data-joins=".golfa .mark img" data-spot="0.2963 0.3095 0.619"></div>
+    </div>
+
+    <div class="beat duo" data-at="1.4 9" data-fade="0.25">
+      <div class="words">
+        <h2>The system of record for your rounds, your games, your trips, and the money between friends.</h2>
+      </div>
+      <!-- No iPhone renderings for golfa yet. Each empty outline below is a place for one:
+           replace a <div class="slot"></div> with <img class="phone" src="/golfa/phones/NAME.webp" alt="…">. -->
+      <div class="visual"><div class="slots"><div class="slot"></div><div class="slot"></div></div></div>
+    </div>
+  </div></div>
+</section>
+
+
+<!-- =============================== roam =============================== -->
+<section class="app roam" id="roam" data-ink="#FFFFFF" style="--len: 5.2">
+  <div class="stage">
+    <canvas id="sky" aria-hidden="true"></canvas>
+    <div class="safe">
+      <header class="head" data-at="-0.45 99" data-fade="0.3">
+        <!-- the wordmark without its "o": the sphere arrives from the middle of the section as you scroll -->
+        <a class="mark" href="/roam/"><img src="/roam/wordmark-open.svg" alt="roam"></a>
+<nav class="cta" aria-label="roam">
+          <span class="links"><a href="/roam/#support">support</a><a href="/roam/#privacy">privacy</a><a href="/roam/#terms">terms</a></span>
+          <a class="store" href="https://apps.apple.com/us/app/roam-one-tap-travel-alarms/id6830828485">download from the app store</a>
+        </nav>
+      </header>
+
+      <img class="orb" data-at="0.4 99" data-fade="1.2 0.4" src="/roam/sphere.svg" alt="" data-joins=".roam .mark img" data-spot="0.3745 0.4158 0.6683">
+      <p class="intro" data-at="0 0.9" data-fade="0.14 0.3"><span>introducing</span><span>v1.2</span></p>
+
+      <div class="beat solo" data-at="1.55 2.05" data-fade="0.25">
+        <div class="words">
+          <p class="eyebrow">roam for iphone · ios 26 and later</p>
+          <h2>roam is the simplest alarm clock ever, and it doesn't jolt you awake.</h2>
+          <p>alarms belong to places: set one in a time zone and it rings only while you're there.</p>
+        </div>
+      </div>
+
+      <div class="beat duo" data-at="2.55 3.05" data-fade="0.25">
+        <div class="words">
+          <h2>one tap<br>travel alarms</h2>
+          <p>spin the globe to a zone. tap a time.</p>
+        </div>
+        <div class="visual"><img class="phone" src="/roam/phones/one-tap.webp" alt="roam on an iPhone: a globe turned to Los Angeles above a grid of alarm times"></div>
+      </div>
+
+      <div class="beat duo flip" data-at="3.55 4.05" data-fade="0.25">
+        <div class="words">
+          <h2>organized by<br>color and name</h2>
+          <p>land in tokyo and your tokyo alarms wake up; your los angeles ones go quiet until you're home.</p>
+        </div>
+        <div class="visual"><img class="phone" src="/roam/phones/color-and-name.webp" alt="roam on an iPhone: a list of named alarms grouped by color"></div>
+      </div>
+
+      <div class="beat duo" data-at="4.55 9" data-fade="0.25">
+        <div class="words">
+          <h2>gently<br>wake you</h2>
+          <p>no account, no server, no analytics — everything stays on your phone.</p>
+        </div>
+        <div class="visual"><img class="phone" src="/roam/phones/gently-wake-you.webp" alt="roam on an iPhone: settings for a 24-hour clock and BOOST volume"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================ WAY ================================ -->
+<section class="app way" id="way" data-ink="#0D0D0D" style="--len: 5.4">
+  <div class="stage">
+    <canvas id="wheels" aria-hidden="true"></canvas>
+    <div class="safe">
+      <header class="head" data-at="-0.45 99" data-fade="0.3">
+        <a class="mark" href="/way/"><img src="/way/mark.svg" alt="WAY"></a>
+<nav class="cta" aria-label="WAY">
+          <span class="links"><a href="/way/#support">Support</a><a href="/way/#privacy">Privacy</a><a href="/way/#terms">Terms</a></span>
+          <a class="store" href="https://apps.apple.com/us/app/way-color-your-way/id6833586010">Download from the App Store</a>
+        </nav>
+      </header>
+
+      <!-- roam and WAY have see-through footers, so their opening pieces wait until the section has all but
+           arrived (data-at starts at 0, with a short fade): that way nothing shows through the footer on the way up -->
+      <div class="beat duo hero" data-at="0 0.8" data-fade="0.14 0.25">
+        <div class="words">
+          <p class="caps version"><b>V</b>1.1</p>
+          <h2 class="caps">Color<br>your<br>w<b>a</b>y</h2>
+        </div>
+        <div class="visual"><img class="wheel" src="/way/mark.svg" alt=""></div>
+      </div>
+
+      <div class="beat solo" data-at="1.3 1.8" data-fade="0.25">
+        <div class="words">
+          <p class="eyebrow">WAY for iPhone · iOS 17 and later</p>
+          <h2>WAY allows you to capture, save, organize, and share colors and palettes.</h2>
+          <p>Point the camera at a color, or upload a photo. WAY reads the color, names it, and shows ten harmonies with HEX and RGB codes. Save colors and palettes into Projects. No account. Nothing leaves your phone.</p>
+        </div>
+      </div>
+
+      <!-- the filmstrip: to add or remove a phone, add or remove a <div class="frame"> and change the 9 in .strip's transform to one less than the number of frames -->
+      <div class="window"><div class="strip" data-at="2.05 5.3" data-fade="0.01">
+        <div class="frame"><h3 class="caps">Color<br>your<br>w<b>a</b>y</h3><img src="/way/phones/color-your-way.webp" alt="WAY's opening screen"></div>
+        <div class="frame"><h3 class="caps">Capt<b>u</b>re any<br>color in<br>the wild</h3><img src="/way/phones/capture.webp" alt="WAY reading a color from the camera"></div>
+        <div class="frame"><h3 class="caps"><b>Z</b>oom into<br>subtle<br>detail</h3><img src="/way/phones/zoom.webp" alt="WAY zoomed in on part of a picture"></div>
+        <div class="frame"><h3 class="caps">Instantly<br>copy he<b>x</b> and<br>RGB codes</h3><img src="/way/phones/codes.webp" alt="WAY showing a color's HEX and RGB codes"></div>
+        <div class="frame"><h3 class="caps">Play with<br>10 color<br><b>h</b>armonies</h3><img src="/way/phones/harmonies.webp" alt="WAY showing color harmonies"></div>
+        <div class="frame"><h3 class="caps">Spin<br>the<br><b>w</b>heel</h3><img src="/way/phones/spin-the-wheel.webp" alt="WAY's color wheel"></div>
+        <div class="frame"><h3 class="caps">Save unlimited<br><b>p</b>alettes<br>and colors</h3><img src="/way/phones/save-palettes.webp" alt="Saving a palette in WAY"></div>
+        <div class="frame"><h3 class="caps">Map pro<b>j</b>ects<br>to your real<br>world builds</h3><img src="/way/phones/projects.webp" alt="Projects in WAY's library"></div>
+        <div class="frame"><h3 class="caps">Nes<b>t</b> palettes<br>and colors<br>into projects</h3><img src="/way/phones/nest.webp" alt="Palettes inside a project in WAY"></div>
+        <div class="frame"><h3 class="caps">U<b>p</b>load images<br>from your<br>device</h3><img src="/way/phones/upload.webp" alt="WAY reading a color from an uploaded photo"></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================ Hew ================================ -->
+<section class="app hew" id="hew" data-ink="#12130D" data-band style="--len: 6.2">
+  <div class="stage">
+    <div class="peek from-top" data-at="-0.2 0.7" data-fade="0.35 0.25"><img src="/hew/phones/intuitive-native-design.webp" alt="Hew on an iPhone, hanging upside down from the top of the screen"></div>
+
+    <div class="peek from-left" data-at="2.1 2.3" data-fade="0.2"><img src="/hew/phones/set-goals.webp" alt="Hew's list of goals"></div>
+    <div class="peek from-bottom" data-at="2.7 2.9" data-fade="0.2"><img src="/hew/phones/attach-habits-and-tasks.webp" alt="Habits and tasks attached to goals in Hew"></div>
+    <div class="peek from-top" data-at="3.3 3.5" data-fade="0.2"><img src="/hew/phones/monitor-progress.webp" alt="Hew's insights screen"></div>
+    <div class="peek from-left" data-at="3.9 4.1" data-fade="0.2"><img src="/hew/phones/swipe-action.webp" alt="Swiping a goal in Hew to edit or delete it"></div>
+    <div class="peek from-bottom" data-at="4.5 4.7" data-fade="0.2"><img src="/hew/phones/calendar-view.webp" alt="Hew's calendar"></div>
+    <div class="peek from-top" data-at="5.1 5.3" data-fade="0.2"><img src="/hew/phones/organize-by-color.webp" alt="Choosing a color family for a goal in Hew"></div>
+    <div class="peek from-left" data-at="5.7 9" data-fade="0.2"><img src="/hew/phones/intuitive-native-design.webp" alt="Hew's Today list"></div>
+
+    <div class="safe">
+      <header class="head" data-at="-0.45 99" data-fade="0.3">
+        <a class="mark" href="/hew/">Hew</a>
+<nav class="cta" aria-label="Hew">
+          <span class="links"><a href="/hew/#support">Support</a><a href="/hew/#privacy">Privacy</a><a href="/hew/#terms">Terms</a></span>
+          <a class="store" href="https://apps.apple.com/us/app/hew-goals-habits-tasks-period/id6836979960">Download from the App Store</a>
+        </nav>
+      </header>
+
+      <p class="say tagline-stack" data-at="-0.2 0.7" data-fade="0.35 0.25">Goals<br>Habits<br>Tasks<br>Period</p>
+
+      <div class="beat solo" data-at="1.2 1.65" data-fade="0.25">
+        <div class="words">
+          <p class="eyebrow">Hew for iPhone · iOS 17 and later</p>
+          <h2>Hew puts goals, habits and tasks all in one place.</h2>
+          <p>Set a goal, attach the habits and tasks that get you there, and check them off each day. Hew shows your streaks, a calendar of what you did, and insights over any time frame. No account. Nothing leaves your phone.</p>
+        </div>
+      </div>
+
+      <p class="say for-left" data-at="2.1 2.3" data-fade="0.2">Set<br>Goals</p>
+      <p class="say for-bottom" data-at="2.7 2.9" data-fade="0.2">Attach<br>Habits<br>&amp; Tasks</p>
+      <p class="say for-top" data-at="3.3 3.5" data-fade="0.2">Monitor<br>Progress</p>
+      <p class="say for-left" data-at="3.9 4.1" data-fade="0.2">Swipe<br>Action</p>
+      <p class="say for-bottom" data-at="4.5 4.7" data-fade="0.2">365 Day<br>Calendar<br>View</p>
+      <p class="say for-top" data-at="5.1 5.3" data-fade="0.2">Organize<br>by Color</p>
+      <p class="say for-left" data-at="5.7 9" data-fade="0.2">Intuitive<br>Native<br>Design</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- =============================== LODGE =============================== -->
+<section class="app lodge" id="lodge" data-ink="#F2EEE4" data-band style="--len: 5">
+  <div class="stage"><div class="safe">
+    <header class="head" data-at="-0.45 99" data-fade="0.3">
+      <a class="mark" href="/LODGE/"><img src="/LODGE/horns-white.png" alt=""><span>LODGE</span></a>
+<nav class="cta" aria-label="LODGE">
+          <span class="links"><a href="/LODGE/#support">Support</a><a href="/LODGE/#privacy">Privacy</a><a href="/LODGE/#terms">Terms</a></span>
+          <span class="soon">Coming soon</span>
+        </nav>
+    </header>
+
+    <!-- The buck, cut out of his photograph (upright, 4 wide by 5 tall, on nothing). The white antlers in the
+         beat below start out lying over his own: their data-spot says where his antlers are in this picture.
+         To use another picture, save it over /LODGE/buck.webp and change that data-spot to suit. -->
+    <img class="buck" src="/LODGE/buck.webp" alt="A buck, head on, looking straight at you" data-at="-0.45 0.45" data-fade="0.3 0.8">
+
+    <div class="beat duo" data-at="1.75 2.75" data-fade="0.35 0.25">
+      <div class="words">
+        <p class="eyebrow">LODGE for iPhone · iOS 17 and later</p>
+        <h2>LODGE is a private logbook for fishing, hunting, foraging and trapping.</h2>
+      </div>
+      <div class="visual"><img class="horns" src="/LODGE/horns-white.png" alt="" data-joins=".buck" data-spot="0.5 0.32 0.493"></div>
+    </div>
+
+    <div class="beat duo" data-at="3.25 3.85" data-fade="0.25">
+      <div class="words">
+        <p>Log each session: where you went, what you took, the gear you used and the story. Keep your spots on a private map, plan trips with your crew, track what rides in the truck, and ask your own logbook questions in plain words. No account. Your logbook is stored only on your iPhone.</p>
+      </div>
+      <!-- No iPhone renderings for LODGE yet. Each empty outline below is a place for one:
+           replace a <div class="slot"></div> with <img class="phone" src="/LODGE/phones/NAME.webp" alt="…">. -->
+      <div class="visual"><div class="slots"><div class="slot"></div><div class="slot"></div></div></div>
+    </div>
+
+    <div class="beat solo" data-at="4.3 9" data-fade="0.25">
+      <div class="words">
+        <h2>LODGE is a logbook, not a rulebook.</h2>
+        <p>It doesn't know the law, the seasons, the limits, the weather or the water where you are, and it can't tell you what is safe to eat. Those are always yours to check.</p>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+
+<!-- =============================== Summed =============================== -->
+<section class="app summed" id="summed" data-ink="#000000" data-band style="--len: 5.7">
+  <div class="stage"><div class="safe">
+    <header class="head" data-at="-0.45 99" data-fade="0.3">
+      <!-- empty at first: the S. arrives from the title as you scroll -->
+      <a class="mark" href="/Summed/" aria-label="Summed."></a>
+<nav class="cta" aria-label="Summed.">
+          <span class="links"><a href="/Summed/#support">Support</a><a href="/Summed/#privacy">Privacy</a><a href="/Summed/#terms">Terms</a></span>
+          <a class="store" href="https://apps.apple.com/us/app/summed-everyday-digests/id6838906784">Download from the App Store</a>
+        </nav>
+    </header>
+
+    <div class="beat solo title">
+      <div>
+        <!-- the word that becomes the logo: "ummed" is cut away, and icon.png takes over from the letters at the end -->
+        <div class="name" data-at="-0.2 99" data-fade="0.35" data-joins=".summed .mark" data-spot="0.5 0.5 1">
+          <h2>S<span class="rest">ummed</span><b>.</b></h2>
+          <img class="seal" src="/Summed/icon.png" alt="">
+        </div>
+        <div class="words" data-at="-0.2 0.25" data-fade="0.35 0.2"><p>Everyday digests<b>.</b></p></div>
+      </div>
+    </div>
+
+    <div class="beat solo" data-at="1.5 2.05" data-fade="0.25">
+      <div class="words">
+        <p class="eyebrow">Summed for iPhone · iOS 26 and later</p>
+        <h2>Summed turns a photo of text into a short English summary<b>.</b></h2>
+        <p>Point the camera at a sign, a menu, a page or a piece of mail, tap the white dot, and get a title, a summary of one to three sentences and a category. Save the ones you want to a library you can browse as a list, on a map or on a calendar. The reading and summarizing happen on your iPhone. No account.</p>
+      </div>
+    </div>
+
+    <div class="beat duo" data-at="2.6 2.85" data-fade="0.3">
+      <div class="words"><h2>Capture text<b>.</b></h2></div>
+      <div class="visual"><img class="phone" src="/Summed/phones/capture-text.webp" alt="Summed's camera pointed at a printed notice"></div>
+    </div>
+    <div class="beat duo" data-at="3.15 3.4" data-fade="0.3">
+      <div class="words"><h2>Categorize digest<b>.</b></h2></div>
+      <div class="visual"><img class="phone" src="/Summed/phones/categorize-digest.webp" alt="A summary in Summed with a title and category"></div>
+    </div>
+    <div class="beat duo" data-at="3.7 3.95" data-fade="0.3">
+      <div class="words"><h2>Save and sort<b>.</b></h2></div>
+      <div class="visual"><img class="phone" src="/Summed/phones/save-and-sort.webp" alt="Summed's library as a list"></div>
+    </div>
+    <div class="beat duo" data-at="4.25 4.5" data-fade="0.3">
+      <div class="words"><h2>By geo<b>.</b></h2></div>
+      <div class="visual"><img class="phone" src="/Summed/phones/by-geo.webp" alt="Summed's library on a map"></div>
+    </div>
+    <div class="beat duo" data-at="4.8 5.05" data-fade="0.3">
+      <div class="words"><h2>By day<b>.</b></h2></div>
+      <div class="visual"><img class="phone" src="/Summed/phones/by-day.webp" alt="Summed's library on a calendar"></div>
+    </div>
+    <div class="beat duo" data-at="5.35 9" data-fade="0.3">
+      <div class="words">
+        <h2>Edit and share<b>.</b></h2>
+        <p><strong>A summary is a shortcut, not a substitute.</strong> It is written by a machine, and it can leave things out, misread them, mistranslate them or get them wrong. For anything that matters, read the original.</p>
+      </div>
+      <div class="visual"><img class="phone" src="/Summed/phones/edit-and-share.webp" alt="A saved summary in Summed, ready to share"></div>
+    </div>
+  </div></div>
+</section>
+
+
+<!-- ============================ the closing grid ============================
+     After Summed, the app logos leave the footer, grow, and settle into a grid that fills
+     the screen. Here each one is in full colour and opens its app's page. -->
+<section class="app outro" id="apps" data-ink="#000000" style="--len: 1.3">
+  <div class="stage"><div class="safe">
+    <nav class="grid" aria-label="All apps">
+      <a href="/golfa/" title="golfa.."><span class="tile" style="--shape: url(/golfa/assets/golfer.svg); --fit: 100%"><i class="shape"></i><img src="/golfa/assets/golfer.svg" alt="golfa.."></span></a>
+      <a href="/roam/" title="roam"><span class="tile" style="--shape: url(/roam/sphere-shape.png); --fit: 82%"><i class="shape"></i><img src="/roam/sphere.svg" alt="roam"></span></a>
+      <a href="/way/" title="WAY"><span class="tile" style="--shape: url(/way/mark.svg); --fit: 82%"><i class="shape"></i><img src="/way/mark.svg" alt="WAY"></span></a>
+      <a href="/hew/" title="Hew"><span class="tile" style="--shape: url(/hew/icon-shape.svg); --fit: 72%"><i class="shape"></i><img src="/hew/icon.svg" alt="Hew"></span></a>
+      <a href="/LODGE/" title="LODGE"><span class="tile" style="--shape: url(/LODGE/horns.png); --fit: 86%"><i class="shape"></i><img src="/LODGE/horns.png" alt="LODGE"></span></a>
+      <a href="/Summed/" title="Summed."><span class="tile" style="--shape: url(/Summed/s-shape.png); --fit: 62%"><i class="shape"></i><img src="/Summed/icon.png" alt="Summed." style="width: 101.1%; height: 101.1%; left: 50.2%; top: 50.2%"></span></a>
+    </nav>
+  </div></div>
+</section>
+
+
+<!-- ======== floating above everything: the letters down the right ========
+     They stay off screen during the opening and come up with the first app's section. -->
 <p class="light" role="img" aria-label="Disappearing light on a screen">
-    <span>D</span>
-    <span>I</span>
-    <span>S</span>
-    <span>A</span>
-    <span>P</span>
-    <span>P</span>
-    <span>E</span>
-    <span>A</span>
-    <span>R</span>
-    <span>I</span>
-    <span>N</span>
-    <span>G</span>
-    <span class="space"></span>
-    <span>L</span>
-    <span>I</span>
-    <span>G</span>
-    <span>H</span>
-    <span>T</span>
-    <span class="space"></span>
-    <span>O</span>
-    <span>N</span>
-    <span class="space"></span>
-    <span>A</span>
-    <span class="space"></span>
-    <span>S</span>
-    <span>C</span>
-    <span>R</span>
-    <span>E</span>
-    <span>E</span>
-    <span>N</span>
+  <span>D</span><span>I</span><span>S</span><span>A</span><span>P</span><span>P</span><span>E</span><span>A</span><span>R</span><span>I</span><span>N</span><span>G</span>
+  <span class="space"></span>
+  <span>L</span><span>I</span><span>G</span><span>H</span><span>T</span>
+  <span class="space"></span>
+  <span>O</span><span>N</span>
+  <span class="space"></span>
+  <span>A</span>
+  <span class="space"></span>
+  <span>S</span><span>C</span><span>R</span><span>E</span><span>E</span><span>N</span>
 </p>
 
-<footer>
-  <a class="wordmark" href="/" aria-label="analog design studio, home"><img src="/logo.svg" alt="analog design studio"></a>
+<!-- == floating above everything: the studio logo, drawn letter by letter ==
+     At the top of the page the letters fill the screen, white with their black 3D edges.
+     As you scroll they shrink into the black logo at the bottom left, where they stay.
+     (This is logo.svg, placed in the page so each letter can move on its own. Each letter is here
+     twice: "glyph-…" is the logo's own drawing; "shade-…" is the same letter redrawn without the
+     fine outlines, which is what shows while the letters are large.) -->
+<svg class="studio-logo" aria-hidden="true" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<!-- the letters exactly as in logo.svg: white faces over black 3D pieces outlined in white -->
+<path id="stroke0_26_101" d="M560 20C574.912 20 587 32.0883 587 47V403C587 417.912 574.912 430 560 430H534C519.088 430 507 417.912 507 403L507 47C507 32.0883 519.088 20 534 20L560 20Z"/>
+<path id="stroke3_26_101" d="M333 44C347.912 44 360 56.0883 360 71L360 403C360 417.912 347.912 430 333 430H307C292.088 430 280 417.912 280 403L280 71C280 56.0883 292.088 44 307 44H333Z"/>
+<path id="stroke5_26_101" d="M1781 398C1781 412.912 1768.91 425 1754 425H1543C1528.09 425 1516 412.912 1516 398V372C1516 357.088 1528.09 345 1543 345H1754C1768.91 345 1781 357.088 1781 372V398Z"/>
+<path id="stroke7_26_101" d="M1501 426C1486.09 426 1474 413.912 1474 399V34C1474 19.0883 1486.09 7 1501 7H1527C1541.91 7 1554 19.0883 1554 34V399C1554 413.912 1541.91 426 1527 426H1501Z"/>
+<path id="stroke10_26_101" d="M789 44C803.912 44 816 56.0883 816 71V403C816 417.912 803.912 430 789 430H763C748.088 430 736 417.912 736 403V71C736 56.0883 748.088 44 763 44H789Z"/>
+<path id="stroke12_26_101" d="M2438 399C2438 413.912 2450.09 426 2465 426H2705C2719.91 426 2732 413.912 2732 399V373C2732 358.088 2719.91 346 2705 346H2465C2450.09 346 2438 358.088 2438 373V399Z"/>
+<path id="stroke15_26_101" d="M1016 31C1016 16.0883 1028.09 4 1043 4H1298C1312.91 4 1325 16.0883 1325 31V57C1325 71.9117 1312.91 84 1298 84H1043C1028.09 84 1016 71.9117 1016 57V31Z"/>
+<path id="stroke17_26_101" d="M1298 44C1312.91 44 1325 56.0883 1325 71V403C1325 417.912 1312.91 430 1298 430H1272C1257.09 430 1245 417.912 1245 403V71C1245 56.0883 1257.09 44 1272 44H1298Z"/>
+<g id="glyph-a">
+<path d="M51 31C51 16.0883 63.0883 4 78 4H333C347.912 4 360 16.0883 360 31V57C360 71.9117 347.912 84 333 84H78C63.0883 84 51 71.9117 51 57V31Z" fill="black"/>
+<mask id="stroke2_26_101" fill="white">
+<path d="M51 31C51 16.0883 63.0883 4 78 4H333C347.912 4 360 16.0883 360 31V57C360 71.9117 347.912 84 333 84H78C63.0883 84 51 71.9117 51 57V31Z"/>
+</mask>
+<path d="M78 84H333C347.912 84 360 71.9117 360 57V31C360 16.0883 347.912 4 333 4H78C63.0883 4 51 16.0883 51 31V57C51 71.9117 63.0883 84 78 84Z" stroke-width="4" stroke="white" mask="url(#stroke2_26_101)"/>
+<use xlink:href="#stroke3_26_101" fill="black"/>
+<mask id="stroke4_26_101" fill="white">
+<use xlink:href="#stroke3_26_101"/>
+</mask>
+<path d="M280 71L280 403C280 417.912 292.088 430 307 430H333C347.912 430 360 417.912 360 403L360 71C360 56.0883 347.912 44 333 44H307C292.088 44 280 56.0883 280 71Z" stroke-width="4" stroke="white" mask="url(#stroke4_26_101)"/>
+<path d="M253 84L253 81L283 81L283 111L280 111A27 27 0 0 0 253 84Z" fill="black"/>
+<path d="M281 111A28 28 0 0 0 253 83" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M299 273C299 355.29 232.29 422 150 422C67.7096 422 1 355.29 1 273C1 190.71 67.7096 124 150 124C232.29 124 299 190.71 299 273Z" fill="black" stroke-width="2" stroke="white"/>
+<path d="M69 47C69 32.0883 81.0883 20 96 20H351C365.912 20 378 32.0883 378 47V73C378 87.9117 365.912 100 351 100H96C81.0883 100 69 87.9117 69 73V47Z" fill="white"/>
+<path d="M351 55C365.912 55 378 67.0883 378 82L378 414C378 428.912 365.912 441 351 441H325C310.088 441 298 428.912 298 414L298 82C298 67.0883 310.088 55 325 55H351Z" fill="white"/>
+<circle cx="172" cy="291" r="150" fill="white"/>
+<path d="M271 100L271 97L301 97L301 127L298 127A27 27 0 0 0 271 100Z" fill="white"/>
+</g>
+<g id="glyph-n">
+<use xlink:href="#stroke0_26_101" fill="black"/>
+<mask id="stroke1_26_101" fill="white">
+<use xlink:href="#stroke0_26_101"/>
+</mask>
+<path d="M507 47L507 403C507 417.912 519.088 430 534 430H560C574.912 430 587 417.912 587 403V47C587 32.0883 574.912 20 560 20L534 20C519.088 20 507 32.0883 507 47Z" stroke-width="4" stroke="white" mask="url(#stroke1_26_101)"/>
+<path d="M507 31C507 16.0883 519.088 4 534 4H789C803.912 4 816 16.0883 816 31V57C816 71.9117 803.912 84 789 84H534C519.088 84 507 71.9117 507 57V31Z" fill="black"/>
+<mask id="stroke9_26_101" fill="white">
+<path d="M507 31C507 16.0883 519.088 4 534 4H789C803.912 4 816 16.0883 816 31V57C816 71.9117 803.912 84 789 84H534C519.088 84 507 71.9117 507 57V31Z"/>
+</mask>
+<path d="M534 84H789C803.912 84 816 71.9117 816 57V31C816 16.0883 803.912 4 789 4H534C519.088 4 507 16.0883 507 31V57C507 71.9117 519.088 84 534 84Z" stroke-width="4" stroke="white" mask="url(#stroke9_26_101)"/>
+<use xlink:href="#stroke10_26_101" fill="black"/>
+<mask id="stroke11_26_101" fill="white">
+<use xlink:href="#stroke10_26_101"/>
+</mask>
+<path d="M736 71V403C736 417.912 748.088 430 763 430H789C803.912 430 816 417.912 816 403V71C816 56.0883 803.912 44 789 44H763C748.088 44 736 56.0883 736 71Z" stroke-width="4" stroke="white" mask="url(#stroke11_26_101)"/>
+<path d="M614 84L614 81L584 81L584 111L587 111A27 27 0 0 1 614 84Z" fill="black"/>
+<path d="M586 111A28 28 0 0 1 614 83" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M709 84L709 81L739 81L739 111L736 111A27 27 0 0 0 709 84Z" fill="black"/>
+<path d="M737 111A28 28 0 0 0 709 83" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M525 47C525 32.0883 537.088 20 552 20H807C821.912 20 834 32.0883 834 47V73C834 87.9117 821.912 100 807 100H552C537.088 100 525 87.9117 525 73V47Z" fill="white"/>
+<path d="M807 39C821.912 39 834 51.0883 834 66V414C834 428.912 821.912 441 807 441H781C766.088 441 754 428.912 754 414V66C754 51.0883 766.088 39 781 39H807Z" fill="white"/>
+<path d="M578 39C592.912 39 605 51.0883 605 66V414C605 428.912 592.912 441 578 441H552C537.088 441 525 428.912 525 414V66C525 51.0883 537.088 39 552 39H578Z" fill="white"/>
+<rect x="509" y="53" width="16" height="36" fill="black"/>
+<path d="M632 100L632 97L602 97L602 127L605 127A27 27 0 0 1 632 100Z" fill="white"/>
+<path d="M727 100L727 97L757 97L757 127L754 127A27 27 0 0 0 727 100Z" fill="white"/>
+</g>
+<g id="glyph-l">
+<use xlink:href="#stroke5_26_101" fill="black"/>
+<mask id="stroke6_26_101" fill="white">
+<use xlink:href="#stroke5_26_101"/>
+</mask>
+<path d="M1754 345H1543C1528.09 345 1516 357.088 1516 372V398C1516 412.912 1528.09 425 1543 425H1754C1768.91 425 1781 412.912 1781 398V372C1781 357.088 1768.91 345 1754 345Z" stroke-width="4" stroke="white" mask="url(#stroke6_26_101)"/>
+<use xlink:href="#stroke7_26_101" fill="black"/>
+<mask id="stroke8_26_101" fill="white">
+<use xlink:href="#stroke7_26_101"/>
+</mask>
+<path d="M1554 399V34C1554 19.0883 1541.91 7 1527 7H1501C1486.09 7 1474 19.0883 1474 34V399C1474 413.912 1486.09 426 1501 426H1527C1541.91 426 1554 413.912 1554 399Z" stroke-width="4" stroke="white" mask="url(#stroke8_26_101)"/>
+<path d="M1581 345L1581 348L1551 348L1551 318L1554 318A27 27 0 0 0 1581 345Z" fill="black"/>
+<path d="M1553 318A28 28 0 0 0 1581 346" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M1803 414C1803 428.912 1790.91 441 1776 441H1521C1506.09 441 1494 428.912 1494 414V388C1494 373.088 1506.09 361 1521 361H1776C1790.91 361 1803 373.088 1803 388V414Z" fill="white"/>
+<path d="M1521 406C1506.09 406 1494 393.912 1494 379V47C1494 32.0883 1506.09 20 1521 20H1547C1561.91 20 1574 32.0883 1574 47V379C1574 393.912 1561.91 406 1547 406H1521Z" fill="white"/>
+<path d="M1601 361L1601 364L1571 364L1571 334L1574 334A27 27 0 0 0 1601 361Z" fill="white"/>
+</g>
+<g id="glyph-o">
+<path d="M2233 273C2233 355.29 2166.29 422 2084 422C2001.71 422 1935 355.29 1935 273C1935 190.71 2001.71 124 2084 124C2166.29 124 2233 190.71 2233 273Z" fill="black" stroke-width="2" stroke="white"/>
+<circle cx="2106" cy="291" r="150" fill="white"/>
+</g>
+<g id="glyph-g">
+<use xlink:href="#stroke12_26_101" fill="black"/>
+<mask id="stroke13_26_101" fill="white">
+<use xlink:href="#stroke12_26_101"/>
+</mask>
+<path d="M2465 346H2705C2719.91 346 2732 358.088 2732 373V399C2732 413.912 2719.91 426 2705 426H2465C2450.09 426 2438 413.912 2438 399V373C2438 358.088 2450.09 346 2465 346Z" stroke-width="4" stroke="white" mask="url(#stroke13_26_101)"/>
+<path d="M2686 157C2686 74.7096 2619.29 8 2537 8C2454.71 8 2388 74.7096 2388 157C2388 239.29 2454.71 306 2537 306C2619.29 306 2686 239.29 2686 157Z" fill="black" stroke-width="2" stroke="white"/>
+<mask id="stroke14_26_101" fill="white">
+<path d="M2721 399C2735.91 399 2748 386.912 2748 372V27C2748 12.0883 2735.91 3.05176e-05 2721 3.05176e-05H2695C2680.09 3.05176e-05 2668 12.0883 2668 27V372C2668 386.912 2680.09 399 2695 399H2721Z"/>
+</mask>
+<path d="M2668 372V27C2668 12.0883 2680.09 1.57356e-05 2695 1.57356e-05H2721C2735.91 1.57356e-05 2748 12.0883 2748 27V372C2748 386.912 2735.91 399 2721 399H2695C2680.09 399 2668 386.912 2668 372Z" stroke-width="4" stroke="white" mask="url(#stroke14_26_101)"/>
+<path d="M2641 346L2641 349L2671 349L2671 319L2668 319A27 27 0 0 1 2641 346Z" fill="black"/>
+<path d="M2669 319A28 28 0 0 1 2641 347" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M2454 414C2454 428.912 2466.09 441 2481 441H2736C2750.91 441 2763 428.912 2763 414V388C2763 373.088 2750.91 361 2736 361H2481C2466.09 361 2454 373.088 2454 388V414Z" fill="white"/>
+<path d="M2736 406C2750.91 406 2763 393.912 2763 379V47C2763 32.0883 2750.91 20 2736 20H2710C2695.09 20 2683 32.0883 2683 47V379C2683 393.912 2695.09 406 2710 406H2736Z" fill="white"/>
+<circle cx="150" cy="150" r="150" transform="matrix(1 0 0 -1 2407 320)" fill="white"/>
+<rect x="2668" y="348" width="2" height="13" fill="black"/>
+<rect x="2670" y="348" width="2" height="13" transform="rotate(-90 2670 348)" fill="black"/>
+<path d="M2656 361L2656 364L2686 364L2686 334L2683 334A27 27 0 0 1 2656 361Z" fill="white"/>
+</g>
+<g id="glyph-d">
+<rect x="258" y="-16" width="80" height="426" rx="27" fill="white"/>
+<circle cx="128" cy="253" r="150" fill="white"/>
+<rect x="260" y="-14" width="76" height="422" rx="25" fill="black"/>
+<circle cx="128" cy="253" r="148" fill="black"/>
+<rect x="276" y="0" width="80" height="421" rx="27" fill="white"/>
+<circle cx="150" cy="271" r="150" fill="white"/>
+</g>
+<g id="glyph-e">
+<rect x="-18" y="-16" width="80" height="421" rx="27" fill="white"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="white"/>
+<circle cx="184" cy="132" r="150" fill="white"/>
+<rect x="-16" y="-14" width="76" height="417" rx="25" fill="black"/>
+<rect x="-16" y="327" width="305" height="76" rx="25" fill="black"/>
+<circle cx="184" cy="132" r="148" fill="black"/>
+<path d="M89 325L89 328L59 328L59 298L62 298A27 27 0 0 0 89 325Z" fill="black"/>
+<path d="M61 298A28 28 0 0 0 89 326" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<rect x="0" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<circle cx="206" cy="150" r="150" fill="white"/>
+<path d="M107 341L107 344L77 344L77 314L80 314A27 27 0 0 0 107 341Z" fill="white"/>
+</g>
+<g id="glyph-s">
+<rect x="-18" y="-16" width="309" height="80" rx="27" fill="white"/>
+<rect x="-18" y="-16" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="-18" y="154.5" width="309" height="80" rx="27" fill="white"/>
+<rect x="211" y="154.5" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="white"/>
+<rect x="-16" y="-14" width="305" height="76" rx="25" fill="black"/>
+<rect x="-16" y="-14" width="76" height="246.5" rx="25" fill="black"/>
+<rect x="-16" y="156.5" width="305" height="76" rx="25" fill="black"/>
+<rect x="213" y="156.5" width="76" height="246.5" rx="25" fill="black"/>
+<rect x="-16" y="327" width="305" height="76" rx="25" fill="black"/>
+<path d="M89 64L89 61L59 61L59 91L62 91A27 27 0 0 1 89 64Z" fill="black"/>
+<path d="M61 91A28 28 0 0 1 89 63" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M89 154.5L89 157.5L59 157.5L59 127.5L62 127.5A27 27 0 0 0 89 154.5Z" fill="black"/>
+<path d="M61 127.5A28 28 0 0 0 89 155.5" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M184 234.5L184 231.5L214 231.5L214 261.5L211 261.5A27 27 0 0 0 184 234.5Z" fill="black"/>
+<path d="M212 261.5A28 28 0 0 0 184 233.5" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M184 325L184 328L214 328L214 298L211 298A27 27 0 0 1 184 325Z" fill="black"/>
+<path d="M212 298A28 28 0 0 1 184 326" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<rect x="0" y="0" width="309" height="80" rx="27" fill="white"/>
+<rect x="0" y="0" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="0" y="170.5" width="309" height="80" rx="27" fill="white"/>
+<rect x="229" y="170.5" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<path d="M107 80L107 77L77 77L77 107L80 107A27 27 0 0 1 107 80Z" fill="white"/>
+<path d="M107 170.5L107 173.5L77 173.5L77 143.5L80 143.5A27 27 0 0 0 107 170.5Z" fill="white"/>
+<path d="M202 250.5L202 247.5L232 247.5L232 277.5L229 277.5A27 27 0 0 0 202 250.5Z" fill="white"/>
+<path d="M202 341L202 344L232 344L232 314L229 314A27 27 0 0 1 202 341Z" fill="white"/>
+</g>
+<g id="glyph-t">
+<rect x="-18" y="-16" width="309" height="80" rx="27" fill="white"/>
+<rect x="96.5" y="-16" width="80" height="426" rx="27" fill="white"/>
+<rect x="-16" y="-14" width="305" height="76" rx="25" fill="black"/>
+<rect x="98.5" y="-14" width="76" height="422" rx="25" fill="black"/>
+<path d="M69.5 64L69.5 61L99.5 61L99.5 91L96.5 91A27 27 0 0 0 69.5 64Z" fill="black"/>
+<path d="M97.5 91A28 28 0 0 0 69.5 63" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M203.5 64L203.5 61L173.5 61L173.5 91L176.5 91A27 27 0 0 1 203.5 64Z" fill="black"/>
+<path d="M175.5 91A28 28 0 0 1 203.5 63" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<rect x="0" y="0" width="309" height="80" rx="27" fill="white"/>
+<rect x="114.5" y="0" width="80" height="421" rx="27" fill="white"/>
+<path d="M87.5 80L87.5 77L117.5 77L117.5 107L114.5 107A27 27 0 0 0 87.5 80Z" fill="white"/>
+<path d="M221.5 80L221.5 77L191.5 77L191.5 107L194.5 107A27 27 0 0 1 221.5 80Z" fill="white"/>
+</g>
+<g id="glyph-u">
+<rect x="-18" y="-16" width="80" height="421" rx="27" fill="white"/>
+<rect x="211" y="-16" width="80" height="421" rx="27" fill="white"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="white"/>
+<rect x="-16" y="-14" width="76" height="417" rx="25" fill="black"/>
+<rect x="213" y="-14" width="76" height="417" rx="25" fill="black"/>
+<rect x="-16" y="327" width="305" height="76" rx="25" fill="black"/>
+<path d="M89 325L89 328L59 328L59 298L62 298A27 27 0 0 0 89 325Z" fill="black"/>
+<path d="M61 298A28 28 0 0 0 89 326" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<path d="M184 325L184 328L214 328L214 298L211 298A27 27 0 0 1 184 325Z" fill="black"/>
+<path d="M212 298A28 28 0 0 1 184 326" stroke="white" stroke-width="2" stroke-linecap="square"/>
+<rect x="0" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="229" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<path d="M107 341L107 344L77 344L77 314L80 314A27 27 0 0 0 107 341Z" fill="white"/>
+<path d="M202 341L202 344L232 344L232 314L229 314A27 27 0 0 1 202 341Z" fill="white"/>
+</g>
+<g id="glyph-i">
+<rect x="-18" y="-16" width="80" height="80" rx="27" fill="white"/>
+<rect x="-18" y="105" width="80" height="305" rx="27" fill="white"/>
+<rect x="-16" y="-14" width="76" height="76" rx="25" fill="black"/>
+<rect x="-16" y="107" width="76" height="301" rx="25" fill="black"/>
+<rect x="0" y="0" width="80" height="80" rx="27" fill="white"/>
+<rect x="0" y="121" width="80" height="300" rx="27" fill="white"/>
+</g>
+<!-- the same letters for the opening, where they are huge and on white: the 3D pieces as solid black, no outlines -->
+<g id="shade-a">
+<path d="M51 31C51 16.0883 63.0883 4 78 4H333C347.912 4 360 16.0883 360 31V57C360 71.9117 347.912 84 333 84H78C63.0883 84 51 71.9117 51 57V31Z" fill="black"/>
+<use xlink:href="#stroke3_26_101" fill="black"/>
+<path d="M253 84L253 81L283 81L283 111L280 111A27 27 0 0 0 253 84Z" fill="black"/>
+<path d="M299 273C299 355.29 232.29 422 150 422C67.7096 422 1 355.29 1 273C1 190.71 67.7096 124 150 124C232.29 124 299 190.71 299 273Z" fill="black" stroke="black" stroke-width="2"/>
+<path d="M69 47C69 32.0883 81.0883 20 96 20H351C365.912 20 378 32.0883 378 47V73C378 87.9117 365.912 100 351 100H96C81.0883 100 69 87.9117 69 73V47Z" fill="white"/>
+<path d="M351 55C365.912 55 378 67.0883 378 82L378 414C378 428.912 365.912 441 351 441H325C310.088 441 298 428.912 298 414L298 82C298 67.0883 310.088 55 325 55H351Z" fill="white"/>
+<circle cx="172" cy="291" r="150" fill="white"/>
+<path d="M271 100L271 97L301 97L301 127L298 127A27 27 0 0 0 271 100Z" fill="white"/>
+</g>
+<g id="shade-n">
+<use xlink:href="#stroke0_26_101" fill="black"/>
+<path d="M507 31C507 16.0883 519.088 4 534 4H789C803.912 4 816 16.0883 816 31V57C816 71.9117 803.912 84 789 84H534C519.088 84 507 71.9117 507 57V31Z" fill="black"/>
+<use xlink:href="#stroke10_26_101" fill="black"/>
+<path d="M614 84L614 81L584 81L584 111L587 111A27 27 0 0 1 614 84Z" fill="black"/>
+<path d="M709 84L709 81L739 81L739 111L736 111A27 27 0 0 0 709 84Z" fill="black"/>
+<path d="M525 47C525 32.0883 537.088 20 552 20H807C821.912 20 834 32.0883 834 47V73C834 87.9117 821.912 100 807 100H552C537.088 100 525 87.9117 525 73V47Z" fill="white"/>
+<path d="M807 39C821.912 39 834 51.0883 834 66V414C834 428.912 821.912 441 807 441H781C766.088 441 754 428.912 754 414V66C754 51.0883 766.088 39 781 39H807Z" fill="white"/>
+<path d="M578 39C592.912 39 605 51.0883 605 66V414C605 428.912 592.912 441 578 441H552C537.088 441 525 428.912 525 414V66C525 51.0883 537.088 39 552 39H578Z" fill="white"/>
+<path d="M632 100L632 97L602 97L602 127L605 127A27 27 0 0 1 632 100Z" fill="white"/>
+<path d="M727 100L727 97L757 97L757 127L754 127A27 27 0 0 0 727 100Z" fill="white"/>
+</g>
+<g id="shade-l">
+<use xlink:href="#stroke5_26_101" fill="black"/>
+<use xlink:href="#stroke7_26_101" fill="black"/>
+<path d="M1581 345L1581 348L1551 348L1551 318L1554 318A27 27 0 0 0 1581 345Z" fill="black"/>
+<path d="M1803 414C1803 428.912 1790.91 441 1776 441H1521C1506.09 441 1494 428.912 1494 414V388C1494 373.088 1506.09 361 1521 361H1776C1790.91 361 1803 373.088 1803 388V414Z" fill="white"/>
+<path d="M1521 406C1506.09 406 1494 393.912 1494 379V47C1494 32.0883 1506.09 20 1521 20H1547C1561.91 20 1574 32.0883 1574 47V379C1574 393.912 1561.91 406 1547 406H1521Z" fill="white"/>
+<path d="M1601 361L1601 364L1571 364L1571 334L1574 334A27 27 0 0 0 1601 361Z" fill="white"/>
+</g>
+<g id="shade-o">
+<path d="M2233 273C2233 355.29 2166.29 422 2084 422C2001.71 422 1935 355.29 1935 273C1935 190.71 2001.71 124 2084 124C2166.29 124 2233 190.71 2233 273Z" fill="black" stroke="black" stroke-width="2"/>
+<circle cx="2106" cy="291" r="150" fill="white"/>
+</g>
+<g id="shade-g">
+<use xlink:href="#stroke12_26_101" fill="black"/>
+<path d="M2686 157C2686 74.7096 2619.29 8 2537 8C2454.71 8 2388 74.7096 2388 157C2388 239.29 2454.71 306 2537 306C2619.29 306 2686 239.29 2686 157Z" fill="black" stroke="black" stroke-width="2"/>
+<path d="M2721 399C2735.91 399 2748 386.912 2748 372V27C2748 12.0883 2735.91 3.05176e-05 2721 3.05176e-05H2695C2680.09 3.05176e-05 2668 12.0883 2668 27V372C2668 386.912 2680.09 399 2695 399H2721Z" fill="black"/>
+<path d="M2641 346L2641 349L2671 349L2671 319L2668 319A27 27 0 0 1 2641 346Z" fill="black"/>
+<path d="M2454 414C2454 428.912 2466.09 441 2481 441H2736C2750.91 441 2763 428.912 2763 414V388C2763 373.088 2750.91 361 2736 361H2481C2466.09 361 2454 373.088 2454 388V414Z" fill="white"/>
+<path d="M2736 406C2750.91 406 2763 393.912 2763 379V47C2763 32.0883 2750.91 20 2736 20H2710C2695.09 20 2683 32.0883 2683 47V379C2683 393.912 2695.09 406 2710 406H2736Z" fill="white"/>
+<circle cx="150" cy="150" r="150" transform="matrix(1 0 0 -1 2407 320)" fill="white"/>
+<path d="M2656 361L2656 364L2686 364L2686 334L2683 334A27 27 0 0 1 2656 361Z" fill="white"/>
+</g>
+<g id="shade-d">
+<rect x="258" y="-16" width="80" height="426" rx="27" fill="black"/>
+<circle cx="128" cy="253" r="150" fill="black"/>
+<rect x="276" y="0" width="80" height="421" rx="27" fill="white"/>
+<circle cx="150" cy="271" r="150" fill="white"/>
+</g>
+<g id="shade-e">
+<rect x="-18" y="-16" width="80" height="421" rx="27" fill="black"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="black"/>
+<circle cx="184" cy="132" r="150" fill="black"/>
+<path d="M89 325L89 328L59 328L59 298L62 298A27 27 0 0 0 89 325Z" fill="black"/>
+<rect x="0" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<circle cx="206" cy="150" r="150" fill="white"/>
+<path d="M107 341L107 344L77 344L77 314L80 314A27 27 0 0 0 107 341Z" fill="white"/>
+</g>
+<g id="shade-s">
+<rect x="-18" y="-16" width="309" height="80" rx="27" fill="black"/>
+<rect x="-18" y="-16" width="80" height="250.5" rx="27" fill="black"/>
+<rect x="-18" y="154.5" width="309" height="80" rx="27" fill="black"/>
+<rect x="211" y="154.5" width="80" height="250.5" rx="27" fill="black"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="black"/>
+<path d="M89 64L89 61L59 61L59 91L62 91A27 27 0 0 1 89 64Z" fill="black"/>
+<path d="M89 154.5L89 157.5L59 157.5L59 127.5L62 127.5A27 27 0 0 0 89 154.5Z" fill="black"/>
+<path d="M184 234.5L184 231.5L214 231.5L214 261.5L211 261.5A27 27 0 0 0 184 234.5Z" fill="black"/>
+<path d="M184 325L184 328L214 328L214 298L211 298A27 27 0 0 1 184 325Z" fill="black"/>
+<rect x="0" y="0" width="309" height="80" rx="27" fill="white"/>
+<rect x="0" y="0" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="0" y="170.5" width="309" height="80" rx="27" fill="white"/>
+<rect x="229" y="170.5" width="80" height="250.5" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<path d="M107 80L107 77L77 77L77 107L80 107A27 27 0 0 1 107 80Z" fill="white"/>
+<path d="M107 170.5L107 173.5L77 173.5L77 143.5L80 143.5A27 27 0 0 0 107 170.5Z" fill="white"/>
+<path d="M202 250.5L202 247.5L232 247.5L232 277.5L229 277.5A27 27 0 0 0 202 250.5Z" fill="white"/>
+<path d="M202 341L202 344L232 344L232 314L229 314A27 27 0 0 1 202 341Z" fill="white"/>
+</g>
+<g id="shade-t">
+<rect x="-18" y="-16" width="309" height="80" rx="27" fill="black"/>
+<rect x="96.5" y="-16" width="80" height="426" rx="27" fill="black"/>
+<path d="M69.5 64L69.5 61L99.5 61L99.5 91L96.5 91A27 27 0 0 0 69.5 64Z" fill="black"/>
+<path d="M203.5 64L203.5 61L173.5 61L173.5 91L176.5 91A27 27 0 0 1 203.5 64Z" fill="black"/>
+<rect x="0" y="0" width="309" height="80" rx="27" fill="white"/>
+<rect x="114.5" y="0" width="80" height="421" rx="27" fill="white"/>
+<path d="M87.5 80L87.5 77L117.5 77L117.5 107L114.5 107A27 27 0 0 0 87.5 80Z" fill="white"/>
+<path d="M221.5 80L221.5 77L191.5 77L191.5 107L194.5 107A27 27 0 0 1 221.5 80Z" fill="white"/>
+</g>
+<g id="shade-u">
+<rect x="-18" y="-16" width="80" height="421" rx="27" fill="black"/>
+<rect x="211" y="-16" width="80" height="421" rx="27" fill="black"/>
+<rect x="-18" y="325" width="309" height="80" rx="27" fill="black"/>
+<path d="M89 325L89 328L59 328L59 298L62 298A27 27 0 0 0 89 325Z" fill="black"/>
+<path d="M184 325L184 328L214 328L214 298L211 298A27 27 0 0 1 184 325Z" fill="black"/>
+<rect x="0" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="229" y="0" width="80" height="421" rx="27" fill="white"/>
+<rect x="0" y="341" width="309" height="80" rx="27" fill="white"/>
+<path d="M107 341L107 344L77 344L77 314L80 314A27 27 0 0 0 107 341Z" fill="white"/>
+<path d="M202 341L202 344L232 344L232 314L229 314A27 27 0 0 1 202 341Z" fill="white"/>
+</g>
+<g id="shade-i">
+<rect x="-18" y="-16" width="80" height="80" rx="27" fill="black"/>
+<rect x="-18" y="105" width="80" height="305" rx="27" fill="black"/>
+<rect x="0" y="0" width="80" height="80" rx="27" fill="white"/>
+<rect x="0" y="121" width="80" height="300" rx="27" fill="white"/>
+</g>
+</defs>
+<rect class="plate" fill="#000" opacity="0"/>
+<g class="glyph"><use xlink:href="#shade-a" transform="translate(228 230)"/><use class="lines" xlink:href="#glyph-a" transform="translate(228 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-n" transform="translate(254.5 230)"/><use class="lines" xlink:href="#glyph-n" transform="translate(254.5 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-a" transform="translate(1240 230)"/><use class="lines" xlink:href="#glyph-a" transform="translate(1240 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-l" transform="translate(297.5 230)"/><use class="lines" xlink:href="#glyph-l" transform="translate(297.5 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-o" transform="translate(346 230)"/><use class="lines" xlink:href="#glyph-o" transform="translate(346 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-g" transform="translate(373 230)"/><use class="lines" xlink:href="#glyph-g" transform="translate(373 230)"/></g>
+<g class="glyph"><use xlink:href="#shade-d" transform="translate(250 821)"/><use class="lines" xlink:href="#glyph-d" transform="translate(250 821)"/></g>
+<g class="glyph"><use xlink:href="#shade-e" transform="translate(756 821)"/><use class="lines" xlink:href="#glyph-e" transform="translate(756 821)"/></g>
+<g class="glyph"><use xlink:href="#shade-s" transform="translate(1285.5 821)"/><use class="lines" xlink:href="#glyph-s" transform="translate(1285.5 821)"/></g>
+<g class="glyph"><use xlink:href="#shade-i" transform="translate(1906 821)"/><use class="lines" xlink:href="#glyph-i" transform="translate(1906 821)"/></g>
+<g class="glyph"><use xlink:href="#shade-g" transform="translate(-133 801)"/><use class="lines" xlink:href="#glyph-g" transform="translate(-133 801)"/></g>
+<g class="glyph"><use xlink:href="#shade-n" transform="translate(2278.5 801)"/><use class="lines" xlink:href="#glyph-n" transform="translate(2278.5 801)"/></g>
+<g class="glyph"><use xlink:href="#shade-s" transform="translate(273.5 1392)"/><use class="lines" xlink:href="#glyph-s" transform="translate(273.5 1392)"/></g>
+<g class="glyph"><use xlink:href="#shade-t" transform="translate(779.5 1392)"/><use class="lines" xlink:href="#glyph-t" transform="translate(779.5 1392)"/></g>
+<g class="glyph"><use xlink:href="#shade-u" transform="translate(1285.5 1392)"/><use class="lines" xlink:href="#glyph-u" transform="translate(1285.5 1392)"/></g>
+<g class="glyph"><use xlink:href="#shade-d" transform="translate(1768 1392)"/><use class="lines" xlink:href="#glyph-d" transform="translate(1768 1392)"/></g>
+<g class="glyph"><use xlink:href="#shade-i" transform="translate(2412 1392)"/><use class="lines" xlink:href="#glyph-i" transform="translate(2412 1392)"/></g>
+<g class="glyph"><use xlink:href="#shade-o" transform="translate(852 1372)"/><use class="lines" xlink:href="#glyph-o" transform="translate(852 1372)"/></g>
+</svg>
+
+<!-- ==== floating above everything: the logo's place, the line, and the app logos ==== -->
+<footer class="base">
+  <a class="studio" href="/" aria-label="analog design studio, back to the top"><noscript><img src="/logo.svg" alt="analog design studio"></noscript></a>
   <p class="tagline">lovingly crafted digital artifacts for the discerning and the obsessed</p>
+  <!-- To add an app: add its section above, one link here pointing at the section's id (and change repeat(6, …) in .dock),
+       and one tile in the closing grid (<nav class="grid">, just above; its columns and rows are set in .grid). -->
+  <nav class="dock" aria-label="Apps">
+    <a href="#golfa" title="golfa.." aria-label="golfa.." style="--shape: url(/golfa/assets/golfer.svg); --fit: 100%"></a>
+    <a href="#roam" title="roam" aria-label="roam" style="--shape: url(/roam/sphere-shape.png); --fit: 82%"></a>
+    <a href="#way" title="WAY" aria-label="WAY" style="--shape: url(/way/mark.svg); --fit: 82%"></a>
+    <a href="#hew" title="Hew" aria-label="Hew" style="--shape: url(/hew/icon-shape.svg); --fit: 72%"></a>
+    <a href="#lodge" title="LODGE" aria-label="LODGE" style="--shape: url(/LODGE/horns.png); --fit: 86%"></a>
+    <a href="#summed" title="Summed." aria-label="Summed." style="--shape: url(/Summed/s-shape.png); --fit: 62%"></a>
+  </nav>
 </footer>
 
 <script>
-/* Each letter is fully dark until you scroll. Then, as a letter climbs the screen,
-   it fades, and it is gone by the time it reaches the height where the D started. */
 (function () {
-  var letters = document.querySelectorAll('.light span:not(.space)');
-  if (!letters.length) return;
-  var FADE = 0.45;                 // letters fade over this share of the screen's height
-  var start = letters[0].getBoundingClientRect().top + (window.pageYOffset || 0);
-  var queued = false;
-  function paint() {
-    queued = false;
-    var zone = window.innerHeight * FADE;
-    var ramp = Math.min(1, (window.pageYOffset || 0) / zone);    // nothing fades before the first scroll
-    var tall = letters[0].offsetHeight;
+  var clamp = function (x, a, b) { return x < a ? a : x > b ? b : x; };
+  var ease = function (x) { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+  var MOTION = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--m')) || 0;
+
+  /* ------------------------------------------------------------------
+     1. The sections, and everything in them that has a data-at.
+     ------------------------------------------------------------------ */
+  var sections = [].map.call(document.querySelectorAll('[data-ink]'), function (el) {
+    var style = getComputedStyle(el);
+    return {
+      el: el, id: el.id, stage: el.querySelector('.stage'),
+      ink: el.dataset.ink, bg: style.backgroundColor, band: el.hasAttribute('data-band'),
+      len: parseFloat(style.getPropertyValue('--len')) || 0, t: -9,
+      items: [].map.call(el.querySelectorAll('[data-at]'), function (it) {
+        var at = it.dataset.at.split(' '), fade = (it.dataset.fade || '0.3').split(' ');
+        return { el: it, a: +at[0], b: +at[1], fin: +fade[0], fout: +(fade[1] || fade[0]) };
+      })
+    };
+  });
+  var byId = {};
+  sections.forEach(function (s) { byId[s.id] = s; });
+
+  /* ------------------------------------------------------------------
+     2. The floating pieces.
+     ------------------------------------------------------------------ */
+  var light = document.querySelector('.light');
+  var letters = [].slice.call(light.querySelectorAll('span:not(.space)'));
+  var base = document.querySelector('.base');
+  var dock = [].slice.call(document.querySelectorAll('.dock a'));
+  var FADE = 0.45;              // letters fade over this share of the screen's height
+  var lightTop, lightHeight, letterTops, letterSize;
+
+  function measure() {
+    lightTop = light.offsetTop; lightHeight = light.offsetHeight;
+    letterTops = letters.map(function (l) { return l.offsetTop; });
+    letterSize = letters[0].offsetHeight;
+  }
+
+  function sectionAt(rects, y) {
+    for (var i = 0; i < sections.length; i++) if (rects[i].top <= y && y < rects[i].bottom) return i;
+    return y < rects[0].top ? 0 : sections.length - 1;
+  }
+
+  function paintFloating(rects, vh, scrolled) {
+    // the letters stay out of the opening: they wait below the screen and come up with the first app's section
+    var opened = sections[1].el.offsetTop, wait = Math.max(0, rects[1].top);
+    // from there the column, which is taller than the screen, climbs slowly, reaching its last letter as the page ends
+    var room = document.documentElement.scrollHeight - vh - opened;
+    var progress = room > 0 ? clamp((scrolled - opened) / room, 0, 1) : 0;
+    var shift = progress * Math.max(0, lightTop + lightHeight - (vh - 40)) - wait;
+    light.style.transform = 'translate3d(0,' + (-shift).toFixed(1) + 'px,0)';
+    light.style.visibility = wait < vh ? 'visible' : 'hidden';
+
+    // each letter is fully dark at first, then fades as it nears the top; its colour follows the section behind it
+    var zone = vh * FADE, ramp = clamp((scrolled - opened) / zone, 0, 1);
     for (var i = 0; i < letters.length; i++) {
-      var top = letters[i].getBoundingClientRect().top;
-      var gone = Math.max(0, Math.min(1, (start + zone - top) / zone)) * ramp;
-      var past = Math.max(0, Math.min(1, (start - top) / tall));     // above where the D started: always gone
-      letters[i].style.opacity = 1 - Math.max(gone, past);
+      var top = lightTop + letterTops[i] - shift;
+      var gone = clamp((lightTop + zone - top) / zone, 0, 1) * ramp;
+      var past = clamp((lightTop - top) / letterSize, 0, 1);
+      letters[i].style.opacity = (1 - Math.max(gone, past)).toFixed(3);
+      letters[i].style.color = sections[sectionAt(rects, top + letterSize / 2)].ink;
+    }
+
+    // the footer takes the colour of the section behind it
+    var foot = base.offsetHeight;
+    var under = sections[sectionAt(rects, vh - foot / 2)], r = rects[sections.indexOf(under)];
+    base.style.setProperty('--ink', under.ink);
+    base.style.setProperty('--band', under.band && r.top <= vh - foot && r.bottom >= vh - 1 ? under.bg : 'transparent');
+
+    // light up the logo of the app on screen
+    var here = sections[sectionAt(rects, vh / 2)].id;
+    dock.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + here); });
+  }
+
+  /* ------------------------------------------------------------------
+     3. The opening: the studio logo, letter by letter. At the top of the
+        page the eighteen letters are spread over the screen (three rows
+        on a wide screen, three columns on a tall one). Scrolling brings
+        each one down to its place in the logo at the bottom left, the
+        black plate fades in behind them, and the line beside the logo
+        slides over to make room.
+     ------------------------------------------------------------------ */
+  var studio = document.querySelector('.studio'), tagline = document.querySelector('.tagline');
+  var logo = document.querySelector('.studio-logo'), plate = logo.querySelector('.plate');
+  var LOGO_HEIGHT = 2063;       // the logo file's own height, in its own units
+  var STAGGER = 0.02;           // how far apart the letters set off
+  var glyphs = [].map.call(logo.querySelectorAll('.glyph'), function (g, i) {
+    var use = g.firstElementChild, box = use.getBBox();
+    var move = /translate\(\s*([-\d.]+)[ ,]+([-\d.]+)/.exec(use.getAttribute('transform'));
+    return { g: g, line: Math.floor(i / 6), w: box.width, h: box.height, cx: box.x + (+move[1]) + box.width / 2, cy: box.y + (+move[2]) + box.height / 2 };
+  });
+  [0, 1, 2].forEach(function (line) {       // each letter's place along its word
+    glyphs.filter(function (g) { return g.line === line; }).sort(function (a, b) { return a.cx - b.cx; }).forEach(function (g, col) { g.col = col; });
+  });
+  var opening = { p: -1 };
+
+  function placeLogo() {
+    var slot = studio.getBoundingClientRect(), vh = window.innerHeight;
+    // the letters start out filling the screen, edge to edge, above the footer
+    var left = slot.left, right = window.innerWidth - slot.left, top = lightTop, bottom = vh - base.offsetHeight - 12;
+    var tall = bottom - top > (right - left) * 1.15;
+    var cols = tall ? 3 : 6, rows = tall ? 6 : 3, cw = (right - left) / cols, ch = (bottom - top) / rows;
+    var widest = Math.max.apply(null, glyphs.map(function (g) { return g.w; })), tallest = Math.max.apply(null, glyphs.map(function (g) { return g.h; }));
+    opening.k0 = Math.min(cw * 0.88 / widest, ch * 0.88 / tallest);
+    opening.k1 = slot.height / LOGO_HEIGHT;
+    glyphs.forEach(function (g) {
+      var col = tall ? g.line : g.col, row = tall ? g.col : g.line;
+      g.x0 = left + (col + 0.5) * cw; g.y0 = top + (row + 0.5) * ch;                       // spread out
+      g.x1 = slot.left + opening.k1 * g.cx; g.y1 = slot.top + opening.k1 * g.cy;           // in the logo
+    });
+    plate.setAttribute('x', slot.left); plate.setAttribute('y', slot.top);
+    plate.setAttribute('width', slot.width); plate.setAttribute('height', slot.height);
+    opening.aside = tagline.getBoundingClientRect().left - parseFloat(tagline.dataset.shift || 0) - slot.left;   // how far the line starts to the left
+    opening.p = -1;
+  }
+
+  function paintLogo(p) {
+    if (p === opening.p) return;
+    opening.p = p;
+    var span = 1 - STAGGER * (glyphs.length - 1);
+    glyphs.forEach(function (g, i) {
+      var q = ease((p - i * STAGGER) / span), k = opening.k0 * Math.pow(opening.k1 / opening.k0, q);
+      var x = g.x0 + (g.x1 - g.x0) * (1 - Math.pow(1 - q, 2.2)), y = g.y0 + (g.y1 - g.y0) * Math.pow(q, 1.5);   // across first, then down
+      g.g.setAttribute('transform', 'translate(' + (x - k * g.cx).toFixed(2) + ' ' + (y - k * g.cy).toFixed(2) + ') scale(' + k.toFixed(5) + ')');
+    });
+    // the line steps aside a little ahead of the plate, so the two never sit on top of each other
+    var shift = -(1 - ease((p - 0.3) / 0.45)) * opening.aside, formed = ease((p - 0.62) / 0.38);
+    plate.setAttribute('opacity', formed.toFixed(3));
+    logo.style.setProperty('--formed', formed.toFixed(3));        // the logo's fine outlines arrive with the plate
+    logo.classList.toggle('plain', formed === 0);
+    tagline.dataset.shift = shift.toFixed(1);
+    tagline.style.transform = 'translate3d(' + shift.toFixed(1) + 'px,0,0)';
+  }
+
+  /* ------------------------------------------------------------------
+     4. The closing: the app logos leave the footer, grow, and settle
+        into a grid that fills the screen.
+     ------------------------------------------------------------------ */
+  var grid = document.querySelector('.grid'), tiles = [].slice.call(grid.querySelectorAll('.tile'));
+
+  // where something sits on its section's stage, before any movement is applied to it
+  function placeOf(el) {
+    var x = 0, y = 0;
+    for (var e = el; e && !e.classList.contains('stage'); e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+    return { x: x, y: y, w: el.offsetWidth, h: el.offsetHeight };
+  }
+  var RISE = 1.1;               // screens of scrolling the rise takes
+  var DIM = parseFloat(getComputedStyle(dock[0]).opacity) || 0.3;   // how faint a resting footer logo is
+  var closing = { up: null, t: null, from: [], to: [] };
+
+  function placeGrid() {
+    var cell = tiles[0].parentNode;
+    grid.style.setProperty('--tile', Math.round(Math.min(cell.offsetWidth, cell.offsetHeight) * 0.66) + 'px');
+    closing.to = tiles.map(function (tile) {              // where each logo ends up on the screen
+      var b = placeOf(tile);
+      return { cx: b.x + b.w / 2, cy: b.y + b.h / 2, w: b.w };
+    });
+    closing.from = dock.map(function (a) {                // where it sits in the footer
+      var r = a.getBoundingClientRect();
+      return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, w: r.width };
+    });
+    closing.t = null;
+  }
+
+  function paintGrid(t) {
+    var up = t >= 0;
+    if (up !== closing.up) {
+      closing.up = up;
+      base.classList.toggle('lifted', up);
+      grid.style.visibility = up ? 'visible' : 'hidden';
+    }
+    if (!up || t === closing.t) return;
+    closing.t = t;
+    var p = clamp(t / RISE, 0, 1);
+    tiles.forEach(function (tile, i) {
+      var q = ease((p - i * 0.07) / (1 - 5 * 0.07)), a = closing.from[i], b = closing.to[i], small = a.w / b.w;
+      tile.style.transform = 'translate3d(' + ((a.cx - b.cx) * (1 - q)).toFixed(1) + 'px,' + ((a.cy - b.cy) * (1 - q)).toFixed(1) + 'px,0) scale(' + (small + (1 - small) * q).toFixed(4) + ')';
+      tile.style.setProperty('--mono', (1 - ease((q - 0.25) / 0.45)).toFixed(3));      // one colour at first, then its own colours
+      tile.style.setProperty('--dim', (DIM + (1 - DIM) * ease(q / 0.2)).toFixed(3));   // as faint as it was in the footer, then solid
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     5. Pieces that travel between two places: golfa's golfer and roam's
+        sphere, which shrink into their logos, and LODGE's white antlers,
+        which start out lying over the buck's own. Each names the picture
+        it joins (data-joins) and the spot on it (data-spot). This works
+        out how far that spot is from the piece's own place, and how much
+        smaller or larger; the piece's styles do the travelling.
+     ------------------------------------------------------------------ */
+  var movers = [].map.call(document.querySelectorAll('[data-joins]'), function (el) {
+    return { el: el, to: document.querySelector(el.dataset.joins), spot: el.dataset.spot.split(' ').map(Number) };   // spot: centre across, centre down, height
+  });
+
+  var rest = document.querySelector('.name .rest');               // Summed's "ummed", which is cut away as the name becomes the logo
+
+  function placeMovers() {
+    rest.style.setProperty('--w', rest.offsetWidth + 'px');
+    movers.forEach(function (m) {
+      var to = placeOf(m.to), own = placeOf(m.el), el = m.el;
+      var drawn = el.naturalWidth ? Math.min(own.h, own.w * el.naturalHeight / el.naturalWidth) : own.h;    // a picture is drawn as tall as fits its box
+      el.style.setProperty('--dx', (to.x + to.w * m.spot[0] - (own.x + own.w / 2)).toFixed(1) + 'px');
+      el.style.setProperty('--dy', (to.y + to.h * m.spot[1] - (own.y + own.h / 2)).toFixed(1) + 'px');
+      el.style.setProperty('--k', (to.h * m.spot[2] / drawn).toFixed(5));
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     6. roam's sky. The app's own stars (Sky.swift and GlobeView.swift):
+        the 73 brightest real stars plus a fixed, seeded field of faint
+        flecks, drawn as small squares in three brightness steps. The sky
+        turns as you scroll through the section.
+     ------------------------------------------------------------------ */
+  var sky = document.getElementById('sky'), skyCtx = sky && sky.getContext && sky.getContext('2d');
+  var D2R = Math.PI / 180;
+  var stars = [  // right ascension (hours), declination (degrees), magnitude
+    [6.75,-16.7,-1.5],[6.4,-52.7,-0.7],[14.26,19.2,0],[18.62,38.8,0],[5.28,46,0.1],[5.24,-8.2,0.1],[7.65,5.2,0.4],[5.92,7.4,0.5],
+    [1.63,-57.2,0.5],[14.06,-60.4,0.6],[19.85,8.9,0.8],[12.44,-63.1,0.8],[4.6,16.5,0.9],[16.49,-26.4,1],[13.42,-11.2,1],[7.76,28,1.1],
+    [22.96,-29.6,1.2],[20.69,45.3,1.3],[12.8,-59.7,1.3],[10.14,12,1.4],[6.98,-29,1.5],[7.58,31.9,1.6],[17.56,-37.1,1.6],[12.52,-57.1,1.6],
+    [5.42,6.3,1.6],[5.44,28.6,1.7],[9.22,-69.7,1.7],[5.6,-1.2,1.7],[22.14,-47,1.7],[5.68,-1.9,1.8],[12.9,56,1.8],[11.06,61.8,1.8],
+    [3.41,49.9,1.8],[7.14,-26.4,1.8],[17.62,-43,1.9],[18.4,-34.4,1.9],[8.38,-59.5,1.9],[13.79,49.3,1.9],[6,44.9,1.9],[16.81,-69,1.9],
+    [6.63,16.4,1.9],[20.43,-56.7,1.9],[8.75,-54.7,2],[6.38,-18,2],[9.46,-8.7,2],[2.53,89.3,2],[2.12,23.5,2],[10.33,19.8,2.1],
+    [0.73,-18,2],[13.4,54.9,2.2],[18.92,-26.3,2],[14.11,-36.4,2.1],[0.14,29.1,2.1],[5.8,-9.7,2.1],[1.16,35.6,2.1],[14.85,74.2,2.1],
+    [17.58,12.6,2.1],[3.14,41,2.1],[2.07,42.3,2.2],[11.82,14.6,2.1],[22.71,-46.9,2.1],[12.69,-49,2.2],[9.28,-59.3,2.2],[9.13,-43.4,2.2],
+    [15.58,26.7,2.2],[5.53,-0.3,2.2],[20.37,40.3,2.2],[17.94,51.5,2.2],[0.68,56.5,2.2],[8.06,-40,2.2],[11.03,56.4,2.4],[12.26,57,2.4],[11.9,53.7,2.4]
+  ].map(function (s) { return [s[0] * 15, s[1], s[2]]; });
+  var seed = 1234567;
+  function rnd() { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; }
+  for (var n = 0; n < 9000; n++) stars.push([rnd() * 360, Math.asin(rnd() * 2 - 1) / D2R, 3 + rnd() * 2.2]);
+  var days = Date.now() / 86400000 - 10957.5;
+  var gmst = 280.46061837 + 360.98564736629 * days; gmst -= Math.floor(gmst / 360) * 360;   // sidereal time now
+  var STAR_SIZE = [2.4, 1.7, 1.2], STAR_ALPHA = [1, 0.75, 0.45], TURN = 22;                // TURN: degrees per screen scrolled
+
+  function fit(canvas, ctx) {   // match a canvas to its size on screen; returns [width, height]
+    var ratio = Math.min(window.devicePixelRatio || 1, 2), w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * ratio) || canvas.height !== Math.round(h * ratio)) {
+      canvas.width = Math.round(w * ratio); canvas.height = Math.round(h * ratio);
+    }
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    return [w, h];
+  }
+
+  function paintSky(t) {
+    if (!skyCtx) return;
+    var size = fit(sky, skyCtx), w = size[0], h = size[1];
+    var S = Math.sqrt(w * w + h * h) / 2 * 1.03, rot = t * TURN * MOTION;
+    var count = Math.min(stars.length, 73 + Math.round(720 * Math.max(1, S * S / 150000)));
+    var c0 = Math.cos(0.6), s0 = Math.sin(0.6);
+    for (var tier = 0; tier < 3; tier++) {
+      skyCtx.fillStyle = 'rgba(255,255,255,' + STAR_ALPHA[tier] + ')';
+      var px = STAR_SIZE[tier];
+      for (var i = 0; i < count; i++) {
+        var s = stars[i];
+        if ((s[2] < 1.2 ? 0 : s[2] < 2.6 ? 1 : 2) !== tier) continue;
+        var a = (s[0] - gmst - rot) * D2R, cl = Math.cos(s[1] * D2R), sl = Math.sin(s[1] * D2R), ca = Math.cos(a);
+        if (s0 * sl + c0 * cl * ca < 0.04) continue;                 // below the horizon
+        var x = w / 2 + cl * Math.sin(a) * S, y = h / 2 - (c0 * sl - s0 * cl * ca) * S;
+        if (x < -2 || y < -2 || x > w + 2 || y > h + 2) continue;
+        skyCtx.fillRect(x - px / 2, y - px / 2, px, px);
+      }
     }
   }
-  function queue() { if (!queued) { queued = true; requestAnimationFrame(paint); } }
-  window.addEventListener('scroll', queue, { passive: true });
-  window.addEventListener('resize', function () {
-    start = letters[0].getBoundingClientRect().top + (window.pageYOffset || 0);
-    queue();
+
+  /* ------------------------------------------------------------------
+     7. WAY's wheels: the mark in offset rows, as in the artwork. Every
+        wheel turns as you scroll, each row against the next.
+     ------------------------------------------------------------------ */
+  var wheels = document.getElementById('wheels'), wheelCtx = wheels && wheels.getContext && wheels.getContext('2d');
+  var SEGMENTS = window.Path2D ? [
+    'M518.84 0.36A500 500 0 0 1 878.89 173.75L640.51 363.85A195.65 195.65 0 0 0 518.84 305.26Z',
+    'M902.39 203.21A500 500 0 0 1 991.31 592.81L694.05 524.97A195.65 195.65 0 0 0 664 393.31Z',
+    'M982.93 629.55A500 500 0 0 1 733.76 941.99L601.47 667.28A195.65 195.65 0 0 0 685.67 561.7Z',
+    'M699.81 958.34A500 500 0 0 1 300.19 958.34L432.48 683.63A195.65 195.65 0 0 0 567.52 683.63Z',
+    'M266.24 941.99A500 500 0 0 1 17.07 629.55L314.33 561.7A195.65 195.65 0 0 0 398.53 667.28Z',
+    'M8.69 592.81A500 500 0 0 1 97.61 203.21L336 393.31A195.65 195.65 0 0 0 305.95 524.97Z',
+    'M121.11 173.75A500 500 0 0 1 481.16 0.36L481.16 305.26A195.65 195.65 0 0 0 359.49 363.85Z'
+  ].map(function (d) { return new Path2D(d); }) : [];
+  var SPIN = 70;                // degrees each wheel turns per screen scrolled
+
+  function paintWheels(t) {
+    if (!wheelCtx || !SEGMENTS.length) return;
+    var size = fit(wheels, wheelCtx), w = size[0], h = size[1];
+    var pitch = clamp(w * 0.14, 130, 210), d = pitch * 0.834, rowGap = pitch * 0.866, k = d / 1000;
+    var angle = t * SPIN * D2R * MOTION;
+    for (var row = 0, y = -d * 0.35; y < h; row++, y += rowGap) {
+      for (var x = (row % 2 ? -pitch / 2 : 0) - d * 0.1; x < w; x += pitch) {
+        wheelCtx.save();
+        wheelCtx.translate(x + d / 2, y + d / 2);
+        wheelCtx.rotate(row % 2 ? -angle : angle);
+        wheelCtx.scale(k, k);
+        wheelCtx.translate(-500, -500);
+        for (var i = 0; i < SEGMENTS.length; i++) {
+          wheelCtx.fillStyle = i ? '#131313' : '#CC5500';
+          wheelCtx.fill(SEGMENTS[i]);
+        }
+        wheelCtx.restore();
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     8. One pass per frame: work out where each section is, and tell
+        its pieces.
+     ------------------------------------------------------------------ */
+  var queued = false;
+  function frame() {
+    queued = false;
+    var vh = window.innerHeight, scrolled = window.pageYOffset || 0;
+    var rects = sections.map(function (s) { return s.el.getBoundingClientRect(); });
+
+    sections.forEach(function (s, i) {
+      if (!s.stage) return;
+      var r = rects[i];
+      if (r.bottom < -vh * 0.5 || r.top > vh * 1.5) return;          // nowhere near the screen
+      // t: screens scrolled since this section took over the screen (negative while it is still arriving)
+      var t = r.top > 0 ? -r.top / vh : -r.top / (r.height - s.stage.offsetHeight) * s.len;
+      s.t = t;
+      s.stage.style.setProperty('--s', t.toFixed(4));
+      s.items.forEach(function (it) {
+        var start = it.a - it.fin, end = Math.min(it.b, s.len + 0.6) + it.fout;     // pieces that stay to the end drift as if they left just after it
+        var arrived = ease((t - start) / it.fin), left = ease((t - it.b) / it.fout), on = arrived * (1 - left);
+        var st = it.el.style;
+        st.setProperty('--in', arrived.toFixed(4));
+        st.setProperty('--out', left.toFixed(4));
+        st.setProperty('--on', on.toFixed(4));
+        st.setProperty('--u', clamp((t - start) / (end - start) * 2 - 1, -1, 1).toFixed(4));
+        st.setProperty('--r', clamp((t - it.a) / (it.b - it.a), 0, 1).toFixed(4));
+        st.visibility = on > 0.001 ? 'visible' : 'hidden';
+        it.el.classList.toggle('settled', on > 0.999);
+      });
+      if (s.id === 'roam') paintSky(t);
+      if (s.id === 'way') paintWheels(t);
+    });
+
+    // the opening and the closing are worked out on every pass, wherever the page is,
+    // so a jump from one end of the page to the other can never leave them half done
+    var cover = byId.top, outro = byId.apps;
+    paintLogo(clamp(scrolled / (cover.el.offsetHeight - cover.stage.offsetHeight), 0, 1));
+    paintGrid(rects[sections.indexOf(outro)].top > 0 ? -1 : outro.t);
+    paintFloating(rects, vh, scrolled);
+  }
+  function queue() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+
+  // the app logos in the footer jump to their sections; the studio logo goes back to the top
+  function jump(id) {
+    var s = byId[id];
+    if (s) window.scrollTo({ top: id === 'top' ? 0 : s.el.offsetTop + window.innerHeight * 0.3, behavior: MOTION ? 'smooth' : 'auto' });
+  }
+  dock.forEach(function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); jump(a.getAttribute('href').slice(1)); });
   });
-  paint();
+  document.querySelector('.studio').addEventListener('click', function (e) {
+    if (!this.hasAttribute('data-route')) { e.preventDefault(); jump('top'); }
+  });
+
+  window.addEventListener('scroll', queue, { passive: true });
+  function setUp() { measure(); placeLogo(); placeGrid(); placeMovers(); queue(); }
+  window.addEventListener('resize', setUp);
+  window.addEventListener('load', setUp);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(setUp);       // letters change width when their typeface arrives
+  measure(); placeLogo(); placeGrid(); placeMovers();
+  frame();
 })();
 </script>
 </body>
